@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  step        Int      // configurator step order (1..12)
+  description String?
+  isRequired  Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  icon        String?
+  layerZIndex Int      @default(10)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pieces              Piece[]
+  compatibilityRules  CompatibilityRule[] @relation("TargetCategory")
+  configurationItems  ConfigurationItem[]
+}
+
+model AttributeDefinition {
+  id          String   @id @default(cuid())
+  name        String   @unique // "diameter", "lug_width", "movement_type"
+  label       String           // "Diameter", "Lug Width"
+  type        String   @default("string") // "string" | "number" | "array" | "boolean"
+  unit        String?          // "mm", "Hz"
+  description String?
+  createdAt   DateTime @default(now())
+
+  pieceAttributes PieceAttribute[]
+}
+
+model Piece {
+  id          String   @id @default(cuid())
+  sku         String   @unique
+  name        String
+  description String?
+  categoryId  String
+  price       Float    @default(0) // addition or base price
+  stock       Int      @default(0)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  tags        String   @default("[]") // JSON array
+  material    String?
+  color       String?
+
+  // Image triple as requested: composition layer, product image, thumbnail
+  compositionImage String? // transparent layer for the watch visual
+  productImage     String? // card photo
+  thumbnail        String? // small avatar
+  layerImage       String? // alias / backwards compatibility
+
+  // Visual layer calibration properties
+  layerScale    Float   @default(1.0)
+  layerX        Float   @default(0.0)
+  layerY        Float   @default(0.0)
+  layerRotation Float   @default(0.0)
+  layerZIndex   Int     @default(10)
+  layerOpacity  Float   @default(1.0)
+  layerVisible  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category           Category             @relation(fields: [categoryId], references: [id])
+  images             PieceImage[]
+  attributes         PieceAttribute[]
+  compatibilityRules CompatibilityRule[]  @relation("SourcePiece")
+  configurationItems ConfigurationItem[]
+}
+
+model PieceImage {
+  id        String  @id @default(cuid())
+  pieceId   String
+  url       String
+  alt       String?
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  piece Piece @relation(fields: [pieceId], references: [id], onDelete: Cascade)
+}
+
+model PieceAttribute {
+  id                    String @id @default(cuid())
+  pieceId               String
+  attributeDefinitionId String
+  value                 String // stored as string, parsed by type
+
+  piece               Piece               @relation(fields: [pieceId], references: [id], onDelete: Cascade)
+  attributeDefinition AttributeDefinition @relation(fields: [attributeDefinitionId], references: [id])
+
+  @@unique([pieceId, attributeDefinitionId])
+}
+
+model CompatibilityRule {
+  id               String  @id @default(cuid())
+  pieceId          String
+  targetCategoryId String
+  ruleType         String  // "whitelist" | "blacklist" | "attribute_match"
+  targetPieceIds   String? // JSON array of piece IDs (for whitelist/blacklist)
+  attributeKey     String? // attribute name to compare (for attribute_match)
+  attributeValue   String? // required value (for attribute_match)
+  description      String?
+
+  piece          Piece    @relation("SourcePiece", fields: [pieceId], references: [id], onDelete: Cascade)
+  targetCategory Category @relation("TargetCategory", fields: [targetCategoryId], references: [id])
+}
+
+model Configuration {
+  id             String   @id @default(cuid())
+  name           String?
+  shareToken     String   @unique @default(cuid())
+  shareCode      String?  @unique // e.g. "WM-8F42K"
+  engravingText  String?  // custom caseback or rotor engraving text
+  engravingFont  String?  // e.g. "classic", "modern", "script"
+  totalPrice     Float    @default(0)
+  status         String   @default("draft") // "draft" | "saved" | "ordered"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  items ConfigurationItem[]
+}
+
+model ConfigurationItem {
+  id              String @id @default(cuid())
+  configurationId String
+  pieceId         String
+  categoryId      String
+  priceAtTime     Float
+
+  configuration Configuration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+  piece         Piece          @relation(fields: [pieceId], references: [id])
+  category      Category       @relation(fields: [categoryId], references: [id])
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model StoreSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model WatchProduct {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  reference   String?
+  description String?
+  price       Float
+  stock       Int      @default(1)
+  isAvailable Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  caliber     String?  // e.g. "Seiko NH35A Automático"
+  caseSize    String?  // e.g. "40mm"
+  waterResist String?  // e.g. "100M / 10 ATM"
+  glass       String?  // e.g. "Cristal Zafiro Plano con AR Azul"
+  bracelet    String?  // e.g. "Brazalete Oyster Acero 316L"
+  mainImage   String
+  gallery     String   @default("[]") // JSON string of images
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

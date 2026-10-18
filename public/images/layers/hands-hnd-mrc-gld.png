@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Common Gradients -->
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f0f0" />
+      <stop offset="25%" stop-color="#d6d8d9" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="75%" stop-color="#a8abae" />
+      <stop offset="100%" stop-color="#686c6d" />
+    </linearGradient>
+    <radialGradient id="sunburstBlack" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#333333" />
+      <stop offset="70%" stop-color="#121212" />
+      <stop offset="100%" stop-color="#050505" />
+    </radialGradient>
+    <radialGradient id="sunburstBlue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#245199" />
+      <stop offset="60%" stop-color="#112c59" />
+      <stop offset="100%" stop-color="#08142b" />
+    </radialGradient>
+    <radialGradient id="sunburstGreen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e5436" />
+      <stop offset="70%" stop-color="#0f2e1d" />
+      <stop offset="100%" stop-color="#07140c" />
+    </radialGradient>
+    <radialGradient id="sunburstSilver" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#e8e8e8" />
+      <stop offset="100%" stop-color="#c4c4c4" />
+    </radialGradient>
+    <radialGradient id="creamVintage" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdfbf4" />
+      <stop offset="75%" stop-color="#f5edd6" />
+      <stop offset="100%" stop-color="#ebdcb9" />
+    </radialGradient>
+    <radialGradient id="champagneGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fbf4dd" />
+      <stop offset="60%" stop-color="#eedbb0" />
+      <stop offset="100%" stop-color="#d8bc82" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faecc1" />
+      <stop offset="40%" stop-color="#d4af37" />
+      <stop offset="70%" stop-color="#f3e5ab" />
+      <stop offset="100%" stop-color="#aa820a" />
+    </linearGradient>
+    <linearGradient id="leatherBrown" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4a2e1b" />
+      <stop offset="25%" stop-color="#734728" />
+      <stop offset="50%" stop-color="#8a5632" />
+      <stop offset="75%" stop-color="#734728" />
+      <stop offset="100%" stop-color="#4a2e1b" />
+    </linearGradient>
+    <linearGradient id="glassGlare" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)" />
+      <stop offset="30%" stop-color="rgba(255,255,255,0.08)" />
+      <stop offset="70%" stop-color="rgba(255,255,255,0.0)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.25)" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Hour hand (Mercedes 3-star circle) -->
+  <g transform="rotate(310 250 250)">
+    <line x1="250" y1="250" x2="250" y2="185" stroke="url(#goldGrad)" stroke-width="4.5" stroke-linecap="round" />
+    <circle cx="250" cy="190" r="9" fill="url(#goldGrad)" stroke="#9c7809" stroke-width="0.75" />
+    <circle cx="250" cy="190" r="6" fill="#fdfbf4" />
+    <path d="M 250 184 L 250 196 M 245 193 L 255 187 M 245 187 L 255 193" stroke="url(#goldGrad)" stroke-width="1.5" />
+    <polygon points="250,172 247,185 253,185" fill="url(#goldGrad)" />
+  </g>
+  <!-- Minute hand -->
+  <g transform="rotate(75 250 250)">
+    <polygon points="250,150 246,245 254,245" fill="url(#goldGrad)" stroke="#9c7809" stroke-width="0.5" />
+    <polygon points="250,158 248,235 252,235" fill="#fdfbf4" />
+  </g>
+  <!-- Seconds hand -->
+  <g transform="rotate(185 250 250)">
+    <line x1="250" y1="280" x2="250" y2="140" stroke="#c92a2a" stroke-width="1" />
+    <circle cx="250" cy="165" r="3" fill="#c92a2a" />
+    <circle cx="250" cy="250" r="4" fill="url(#goldGrad)" />
+  </g>
+
+</svg>

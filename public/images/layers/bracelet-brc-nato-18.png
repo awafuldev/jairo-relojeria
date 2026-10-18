@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Common Gradients -->
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f0f0" />
+      <stop offset="25%" stop-color="#d6d8d9" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="75%" stop-color="#a8abae" />
+      <stop offset="100%" stop-color="#686c6d" />
+    </linearGradient>
+    <radialGradient id="sunburstBlack" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#333333" />
+      <stop offset="70%" stop-color="#121212" />
+      <stop offset="100%" stop-color="#050505" />
+    </radialGradient>
+    <radialGradient id="sunburstBlue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#245199" />
+      <stop offset="60%" stop-color="#112c59" />
+      <stop offset="100%" stop-color="#08142b" />
+    </radialGradient>
+    <radialGradient id="sunburstGreen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e5436" />
+      <stop offset="70%" stop-color="#0f2e1d" />
+      <stop offset="100%" stop-color="#07140c" />
+    </radialGradient>
+    <radialGradient id="sunburstSilver" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#e8e8e8" />
+      <stop offset="100%" stop-color="#c4c4c4" />
+    </radialGradient>
+    <radialGradient id="creamVintage" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdfbf4" />
+      <stop offset="75%" stop-color="#f5edd6" />
+      <stop offset="100%" stop-color="#ebdcb9" />
+    </radialGradient>
+    <radialGradient id="champagneGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fbf4dd" />
+      <stop offset="60%" stop-color="#eedbb0" />
+      <stop offset="100%" stop-color="#d8bc82" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faecc1" />
+      <stop offset="40%" stop-color="#d4af37" />
+      <stop offset="70%" stop-color="#f3e5ab" />
+      <stop offset="100%" stop-color="#aa820a" />
+    </linearGradient>
+    <linearGradient id="leatherBrown" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4a2e1b" />
+      <stop offset="25%" stop-color="#734728" />
+      <stop offset="50%" stop-color="#8a5632" />
+      <stop offset="75%" stop-color="#734728" />
+      <stop offset="100%" stop-color="#4a2e1b" />
+    </linearGradient>
+    <linearGradient id="glassGlare" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)" />
+      <stop offset="30%" stop-color="rgba(255,255,255,0.08)" />
+      <stop offset="70%" stop-color="rgba(255,255,255,0.0)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.25)" />
+    </linearGradient>
+  </defs>
+  
+  <rect x="202" y="10" width="96" height="480" rx="3" fill="#6d6e50" stroke="#3b3b27" stroke-width="1" />
+  <!-- Webbing weave lines -->
+  <line x1="202" y1="20" x2="298" y2="20" stroke="#525439" stroke-width="1.5"/><line x1="202" y1="50" x2="298" y2="50" stroke="#525439" stroke-width="1.5"/><line x1="202" y1="80" x2="298" y2="80" stroke="#525439" stroke-width="1.5"/><line x1="202" y1="110" x2="298" y2="110" stroke="#525439" stroke-width="1.5"/><line x1="202" y1="390" x2="298" y2="390" stroke="#525439" stroke-width="1.5"/><line x1="202" y1="420" x2="298" y2="420" stroke="#525439" stroke-width="1.5"/><line x1="202" y1="450" x2="298" y2="450" stroke="#525439" stroke-width="1.5"/>
+  <!-- Hardware loops -->
+  <rect x="198" y="70" width="104" height="8" rx="2" fill="url(#steelGrad)" stroke="#484a4c" stroke-width="1" />
+  <rect x="198" y="420" width="104" height="8" rx="2" fill="url(#steelGrad)" stroke="#484a4c" stroke-width="1" />
+
+</svg>

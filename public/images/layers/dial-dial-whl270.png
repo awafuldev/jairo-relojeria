@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Common Gradients -->
+    <linearGradient id="steelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f0f0" />
+      <stop offset="25%" stop-color="#d6d8d9" />
+      <stop offset="50%" stop-color="#ffffff" />
+      <stop offset="75%" stop-color="#a8abae" />
+      <stop offset="100%" stop-color="#686c6d" />
+    </linearGradient>
+    <radialGradient id="sunburstBlack" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#333333" />
+      <stop offset="70%" stop-color="#121212" />
+      <stop offset="100%" stop-color="#050505" />
+    </radialGradient>
+    <radialGradient id="sunburstBlue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#245199" />
+      <stop offset="60%" stop-color="#112c59" />
+      <stop offset="100%" stop-color="#08142b" />
+    </radialGradient>
+    <radialGradient id="sunburstGreen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e5436" />
+      <stop offset="70%" stop-color="#0f2e1d" />
+      <stop offset="100%" stop-color="#07140c" />
+    </radialGradient>
+    <radialGradient id="sunburstSilver" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#e8e8e8" />
+      <stop offset="100%" stop-color="#c4c4c4" />
+    </radialGradient>
+    <radialGradient id="creamVintage" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdfbf4" />
+      <stop offset="75%" stop-color="#f5edd6" />
+      <stop offset="100%" stop-color="#ebdcb9" />
+    </radialGradient>
+    <radialGradient id="champagneGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fbf4dd" />
+      <stop offset="60%" stop-color="#eedbb0" />
+      <stop offset="100%" stop-color="#d8bc82" />
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faecc1" />
+      <stop offset="40%" stop-color="#d4af37" />
+      <stop offset="70%" stop-color="#f3e5ab" />
+      <stop offset="100%" stop-color="#aa820a" />
+    </linearGradient>
+    <linearGradient id="leatherBrown" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4a2e1b" />
+      <stop offset="25%" stop-color="#734728" />
+      <stop offset="50%" stop-color="#8a5632" />
+      <stop offset="75%" stop-color="#734728" />
+      <stop offset="100%" stop-color="#4a2e1b" />
+    </linearGradient>
+    <linearGradient id="glassGlare" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)" />
+      <stop offset="30%" stop-color="rgba(255,255,255,0.08)" />
+      <stop offset="70%" stop-color="rgba(255,255,255,0.0)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.25)" />
+    </linearGradient>
+  </defs>
+  
+    <circle cx="250" cy="250" r="118" fill="#fcfcfc" />
+    <!-- Minute tracks -->
+    <circle cx="250" cy="250" r="114" fill="none" stroke="#c4c4c4" stroke-width="0.5" stroke-dasharray="1 5.97" />
+    <line x1="250.0" y1="138.0" x2="250.0" y2="154.0" stroke="#111111" stroke-width="4" stroke-linecap="square" />
+<line x1="306.0" y1="153.0" x2="301.0" y2="161.7" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="347.0" y1="194.0" x2="338.3" y2="199.0" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="362.0" y1="250.0" x2="346.0" y2="250.0" stroke="#111111" stroke-width="4" stroke-linecap="square" />
+<line x1="347.0" y1="306.0" x2="338.3" y2="301.0" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="306.0" y1="347.0" x2="301.0" y2="338.3" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="250.0" y1="362.0" x2="250.0" y2="346.0" stroke="#111111" stroke-width="4" stroke-linecap="square" />
+<line x1="194.0" y1="347.0" x2="199.0" y2="338.3" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="153.0" y1="306.0" x2="161.7" y2="301.0" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="138.0" y1="250.0" x2="154.0" y2="250.0" stroke="#111111" stroke-width="4" stroke-linecap="square" />
+<line x1="153.0" y1="194.0" x2="161.7" y2="199.0" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+<line x1="194.0" y1="153.0" x2="199.0" y2="161.7" stroke="#111111" stroke-width="2" stroke-linecap="square" />
+
+    <!-- Center pinion -->
+    <circle cx="250" cy="250" r="6" fill="#121212" stroke="#111111" stroke-width="1" />
+  
+</svg>
