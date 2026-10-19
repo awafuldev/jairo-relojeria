@@ -36,7 +36,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 font-cabin text-[11px] uppercase tracking-[0.1em] text-[#25D366] hover:underline transition-colors font-medium"
               >
-                <span>WhatsApp (+1 809-304-4536)</span>
+                <span>WhatsApp (+57 310-540-1603)</span>
                 <span>↗</span>
               </a>
             </div>

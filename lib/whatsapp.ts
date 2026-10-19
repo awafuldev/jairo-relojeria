@@ -1,7 +1,8 @@
 // Centralized WhatsApp integration for Jairo Relojería orders and inquiries
 
+// Real number from @jairorelojeria Instagram: wa.link/d4myw9 → +57 310 540 1603 (Colombia)
 export const DEFAULT_WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '18290000000'
+  process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '573105401603'
 
 export function formatWhatsAppPhone(phone: string): string {
   return phone.replace(/\D/g, '')

@@ -107,7 +107,7 @@ export default function AboutClient() {
                 rel="noopener noreferrer"
                 className="text-[13px] font-poppins text-[#25D366] hover:underline underline-offset-4 transition-colors font-medium flex items-center gap-1.5"
               >
-                +1 (809) 304-4536 (Atención Directa WhatsApp) ↗
+                +57 310 540 1603 (Atención Directa WhatsApp) ↗
               </a>
             </div>
 
