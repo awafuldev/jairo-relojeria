@@ -1,6 +1,7 @@
 'use client'
 
 import { useConfiguratorStore } from '@/lib/store'
+import { useI18n } from '@/lib/i18n/context'
 
 interface StepNavProps {
   mobile?: boolean
@@ -8,6 +9,11 @@ interface StepNavProps {
 
 export default function StepNav({ mobile }: StepNavProps) {
   const { categories, currentStepIndex, selections, setCurrentStep } = useConfiguratorStore()
+  const { t } = useI18n()
+
+  const getCategoryName = (cat: { slug: string; name: string }) => {
+    return t.categories[cat.slug] || cat.name
+  }
 
   if (mobile) {
     return (
@@ -33,7 +39,7 @@ export default function StepNav({ mobile }: StepNavProps) {
                 <span className={isActive ? 'text-[#1dd8e1]' : 'text-[#2e3438]'}>
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span>{cat.name}</span>
+                <span>{getCategoryName(cat)}</span>
                 {isCompleted && <span className="text-[#1dd8e1] font-bold text-[9px]">✓</span>}
               </button>
             )
@@ -47,7 +53,7 @@ export default function StepNav({ mobile }: StepNavProps) {
                 : 'bg-[#ffffff] text-[#2e3438] border-[#d5d6d7]'
             }`}
           >
-            Revisión Final
+            {t.stepNav.finalReview}
           </button>
         </div>
       </div>
@@ -58,9 +64,9 @@ export default function StepNav({ mobile }: StepNavProps) {
   return (
     <div className="flex flex-col px-3 gap-1">
       <div className="px-3 pb-3 mb-2 border-b border-[#f7f7f7]">
-        <p className="font-cabin text-[9px] uppercase tracking-[0.14em] text-[#2e3438]">Configurador</p>
+        <p className="font-cabin text-[9px] uppercase tracking-[0.14em] text-[#2e3438]">{t.stepNav.configurator}</p>
         <p className="font-jost text-[13px] font-bold uppercase tracking-[0.08em] text-[#0a0d0f]">
-          Componentes ({categories.length})
+          {t.stepNav.components} ({categories.length})
         </p>
       </div>
 
@@ -90,7 +96,7 @@ export default function StepNav({ mobile }: StepNavProps) {
 
               {/* Category Name */}
               <span className="truncate flex-1">
-                {cat.name}
+                {getCategoryName(cat)}
               </span>
 
               {/* Status Indicator */}
@@ -119,7 +125,7 @@ export default function StepNav({ mobile }: StepNavProps) {
           <span className="font-mono text-[10px] w-4 shrink-0 text-[#1dd8e1]">
             {String(categories.length + 1).padStart(2, '0')}
           </span>
-          <span className="flex-1">Revisión Final</span>
+          <span className="flex-1">{t.stepNav.finalReview}</span>
           <span className="text-[10px]">→</span>
         </button>
       </div>

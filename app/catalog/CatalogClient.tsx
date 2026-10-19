@@ -57,7 +57,7 @@ export default function CatalogClient({ watches }: { watches: Watch[] }) {
               : 'border-transparent text-[#2e3438] hover:text-[#0a0d0f]'
           }`}
         >
-          Diver & Submariner
+          {t.catalog.filterSub}
         </button>
 
         <button
@@ -69,7 +69,7 @@ export default function CatalogClient({ watches }: { watches: Watch[] }) {
               : 'border-transparent text-[#2e3438] hover:text-[#0a0d0f]'
           }`}
         >
-          GMT Dual Time
+          {t.catalog.filterGmt}
         </button>
 
         <button
@@ -81,7 +81,7 @@ export default function CatalogClient({ watches }: { watches: Watch[] }) {
               : 'border-transparent text-[#2e3438] hover:text-[#0a0d0f]'
           }`}
         >
-          Explorer & Clásicos
+          {t.catalog.filterExplorer}
         </button>
       </div>
 
@@ -143,7 +143,9 @@ export default function CatalogClient({ watches }: { watches: Watch[] }) {
             {/* Price & View Detail Action */}
             <div className="mt-6 pt-4 border-t border-[#f7f7f7] flex items-center justify-between">
               <div>
-                <span className="font-cabin text-[9px] text-[#2e3438] block uppercase tracking-wider">Inversión</span>
+                <span className="font-cabin text-[9px] text-[#2e3438] block uppercase tracking-wider">
+                  {t.featuredShowcase.investment}
+                </span>
                 <span className="font-poppins font-normal text-[16px] text-[#0a0d0f] tabular-nums">
                   ${watch.price.toFixed(0)} <span className="text-[11px] text-[#2e3438]">USD</span>
                 </span>

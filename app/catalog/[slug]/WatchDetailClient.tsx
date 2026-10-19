@@ -119,7 +119,7 @@ export default function WatchDetailClient({ watch }: WatchDetailProps) {
         {/* Price & Stock Banner */}
         <div className="p-4 bg-[#f7f7f7] border border-[#d5d6d7] rounded-[3px] flex items-center justify-between">
           <div>
-            <span className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] block">Inversión</span>
+            <span className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] block">{t.featuredShowcase.investment}</span>
             <span className="font-poppins text-2xl font-bold text-[#0a0d0f]">
               ${watch.price.toFixed(0)} <span className="font-cabin text-xs text-[#2e3438] font-normal">USD</span>
             </span>

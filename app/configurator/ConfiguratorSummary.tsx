@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useConfiguratorStore } from '@/lib/store'
+import { useI18n } from '@/lib/i18n/context'
 import Link from 'next/link'
 
 export default function ConfiguratorSummary() {
@@ -16,6 +17,8 @@ export default function ConfiguratorSummary() {
     setCurrentStep,
     reset,
   } = useConfiguratorStore()
+
+  const { t } = useI18n()
 
   const [saving, setSaving] = useState(false)
   const [savedCode, setSavedCode] = useState<string | null>(null)
@@ -33,7 +36,7 @@ export default function ConfiguratorSummary() {
       .catch(() => {})
   }, [])
 
-  // Generate or retrieve bespoke code: e.g. WM-8F42K
+  // Generate or retrieve bespoke code: e.g. JR-8F42K
   const generateCode = () => {
     const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
     let rand = ''
@@ -82,6 +85,10 @@ export default function ConfiguratorSummary() {
     setTimeout(() => setCopied(false), 2500)
   }
 
+  const getCategoryName = (cat: { slug: string; name: string }) => {
+    return t.categories[cat.slug] || cat.name
+  }
+
   const requiredCategories = categories.filter(c => c.isRequired)
   const missingCategories = requiredCategories.filter(c => !selections[c.id])
   const isComplete = missingCategories.length === 0
@@ -91,23 +98,23 @@ export default function ConfiguratorSummary() {
       {/* Header */}
       <div className="mb-10">
         <span className="font-cabin text-[11px] uppercase tracking-[0.14em] text-[#1dd8e1] font-semibold block mb-1">
-          Paso Final — Ficha Técnica & Revisión de Ensamble
+          {t.configurator.summaryEyebrow}
         </span>
         <h1 className="editorial-title text-3xl sm:text-4xl text-[#0a0d0f] tracking-[0.08em]">
-          Tu Reloj Personalizado
+          {t.configurator.summaryTitle}
         </h1>
         <div className="w-10 h-0.5 bg-[#1dd8e1] my-3" />
         <p className="text-[14px] text-[#2e3438] mt-1.5 leading-relaxed">
-          Cada componente ha sido verificado bajo estrictas tolerancias mecánicas. Revisa tu configuración antes de solicitar el encargo al taller de Jairo Relojería.
+          {t.configurator.summaryDesc}
         </p>
       </div>
 
       {/* Warnings if missing parts */}
       {!isComplete && (
         <div className="mb-8 p-4 bg-[#fff8eb] border border-[#f5d485] rounded-[3px] text-[13px] text-[#8a5300] space-y-2">
-          <p className="font-medium font-cabin uppercase tracking-wider text-[11px]">⚠️ Configuración Incompleta</p>
+          <p className="font-medium font-cabin uppercase tracking-wider text-[11px]">{t.configurator.incompleteTitle}</p>
           <p className="text-[12px]">
-            Para poder enviar a manufactura tu reloj, debes seleccionar los siguientes componentes obligatorios:
+            {t.configurator.incompleteDesc}
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
             {missingCategories.map(cat => {
@@ -118,7 +125,7 @@ export default function ConfiguratorSummary() {
                   onClick={() => setCurrentStep(idx)}
                   className="px-2.5 py-1 bg-white border border-[#f5d485] rounded-[3px] font-cabin text-[10px] uppercase tracking-wider font-semibold text-black hover:bg-[#8a5300] hover:text-white transition-colors"
                 >
-                  Seleccionar {cat.name} →
+                  {t.configurator.selectCategoryBtn} {getCategoryName(cat)} →
                 </button>
               )
             })}
@@ -160,7 +167,7 @@ export default function ConfiguratorSummary() {
 
           <div className="w-full pt-4 mt-4 border-t border-[#d5d6d7] text-center">
             <span className="font-cabin text-[9px] uppercase tracking-[0.14em] text-[#2e3438]">
-              Renderizado Digital de Ensamble 1:1
+              {t.configurator.renderDisclaimer}
             </span>
           </div>
         </div>
@@ -170,16 +177,16 @@ export default function ConfiguratorSummary() {
           <div className="border border-[#d5d6d7] rounded-[3px] bg-[#ffffff] divide-y divide-[#d5d6d7] overflow-hidden">
             <div className="p-4 bg-[#f7f7f7] flex items-center justify-between">
               <span className="font-cabin text-[11px] uppercase tracking-[0.14em] font-semibold text-[#0a0d0f]">
-                Desglose de Componentes
+                {t.configurator.breakdownTitle}
               </span>
-              <span className="font-cabin text-[10px] text-[#2e3438]">{categories.length} Pasos</span>
+              <span className="font-cabin text-[10px] text-[#2e3438]">{categories.length} {t.configurator.stepsCount}</span>
             </div>
 
             {/* Base Watch Line */}
             <div className="p-4 flex items-center justify-between text-[13px]">
               <div>
-                <p className="font-poppins font-medium text-[#0a0d0f]">Ensamble Maestro & Calibración Suiza</p>
-                <p className="text-[12px] text-[#2e3438]">Pruebas de hermeticidad y regulación cronométrica en taller</p>
+                <p className="font-poppins font-medium text-[#0a0d0f]">{t.configurator.baseAssemblyTitle}</p>
+                <p className="text-[12px] text-[#2e3438]">{t.configurator.baseAssemblyDesc}</p>
               </div>
               <span className="font-mono text-[#0a0d0f] font-semibold">${priceBreakdown.basePrice}</span>
             </div>
@@ -196,12 +203,12 @@ export default function ConfiguratorSummary() {
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <div className="min-w-0">
-                      <span className="font-cabin text-[9px] uppercase tracking-wider text-[#2e3438] block">{cat.name}</span>
+                      <span className="font-cabin text-[9px] uppercase tracking-wider text-[#2e3438] block">{getCategoryName(cat)}</span>
                       {piece ? (
                         <p className="font-poppins font-medium text-[#0a0d0f] truncate">{piece.name}</p>
                       ) : (
                         <p className="text-[#2e3438] italic text-[12px]">
-                          {cat.isRequired ? 'No seleccionado (Requerido)' : 'Opcional, no incluido'}
+                          {cat.isRequired ? t.configurator.notSelectedRequired : t.configurator.optionalNotIncluded}
                         </p>
                       )}
                     </div>
@@ -219,7 +226,7 @@ export default function ConfiguratorSummary() {
                       onClick={() => setCurrentStep(idx)}
                       className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] hover:text-[#0a0d0f] underline"
                     >
-                      Editar
+                      {t.configurator.edit}
                     </button>
                   </div>
                 </div>
@@ -230,7 +237,7 @@ export default function ConfiguratorSummary() {
             {engravingText && engravingText.trim().length > 0 && (
               <div className="p-3.5 flex items-center justify-between bg-[#f7f7f7] text-[13px]">
                 <div>
-                  <span className="font-cabin text-[9px] uppercase tracking-wider text-[#2e3438] block">Grabado Láser de Fibra</span>
+                  <span className="font-cabin text-[9px] uppercase tracking-wider text-[#2e3438] block">{t.configurator.laserAddonTitle}</span>
                   <p className="font-mono text-[#0a0d0f]">"{engravingText}" ({engravingFont})</p>
                 </div>
                 <span className="font-mono text-[#0a0d0f] font-semibold">+$30</span>
@@ -241,9 +248,9 @@ export default function ConfiguratorSummary() {
             <div className="p-5 bg-[#0a0d0f] text-[#ffffff] flex items-center justify-between">
               <div>
                 <span className="font-cabin text-[10px] text-white/70 uppercase tracking-[0.14em] block font-semibold">
-                  Inversión Total
+                  {t.configurator.totalInvestment}
                 </span>
-                <span className="font-poppins text-[11px] text-white/50">Incluye ensamble, ajuste y prueba en taller</span>
+                <span className="font-poppins text-[11px] text-white/50">{t.configurator.totalIncludes}</span>
               </div>
               <span className="font-poppins text-2xl font-bold font-mono tabular-nums text-[#ffffff]">
                 ${totalPrice.toFixed(0)} <span className="font-cabin text-xs font-semibold text-[#1dd8e1]">USD</span>
@@ -257,7 +264,7 @@ export default function ConfiguratorSummary() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] block">
-                    Código de Diseño Oficial:
+                    {t.configurator.designCodeTitle}
                   </span>
                   <p className="font-mono text-xl font-bold text-[#0a0d0f]">{savedCode}</p>
                 </div>
@@ -266,7 +273,7 @@ export default function ConfiguratorSummary() {
                   onClick={handleCopyLink}
                   className="btn-outline-dark text-[10px] py-2 px-3"
                 >
-                  {copied ? '✓ Enlace Copiado' : 'Copiar Enlace'}
+                  {copied ? t.configurator.linkCopied : t.configurator.copyLink}
                 </button>
               </div>
               <p className="text-[12px] text-[#2e3438] font-poppins">
@@ -281,7 +288,7 @@ export default function ConfiguratorSummary() {
                 disabled={saving}
                 className="btn-outline-dark flex-1 justify-center py-3 text-[11px]"
               >
-                {saving ? 'Guardando...' : 'Guardar y Generar Código de Diseño (JR-ID)'}
+                {saving ? t.configurator.saving : t.configurator.saveCodeBtn}
               </button>
             </div>
           )}
@@ -294,10 +301,10 @@ export default function ConfiguratorSummary() {
               )}%0D%0A%0D%0AGrabado: ${engravingText || 'Ninguno'}%0D%0ATotal: $${totalPrice} USD%0D%0ACódigo de Diseño: ${savedCode || 'Pendiente'}`}
               className="btn-teal w-full justify-center py-4 text-[12px] tracking-wider uppercase font-semibold"
             >
-              Solicitar Encargo al Taller de Jairo Relojería →
+              {t.configurator.commissionBtn}
             </a>
             <p className="font-poppins text-[11px] text-[#2e3438] text-center leading-relaxed">
-              * Al pulsar este botón se abrirá tu programa de correo predeterminado con el desglose completo y código oficial para confirmar detalles con el relojero.
+              {t.configurator.commissionDisclaimer}
             </p>
           </div>
 
@@ -307,10 +314,10 @@ export default function ConfiguratorSummary() {
               onClick={reset}
               className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] hover:text-[#0a0d0f] transition-colors"
             >
-              Reiniciar configuración desde cero
+              {t.configurator.resetConfig}
             </button>
             <Link href="/catalog" className="font-cabin text-[10px] uppercase tracking-wider text-[#0a0d0f] hover:text-[#1dd8e1]">
-              Ver catálogo completo de piezas →
+              {t.configurator.viewFullCatalog}
             </Link>
           </div>
         </div>

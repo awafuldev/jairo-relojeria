@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Watch {
   id: string
@@ -20,6 +21,7 @@ interface Watch {
 }
 
 export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] }) {
+  const { t } = useI18n()
   const [activeHeroWatch, setActiveHeroWatch] = useState<Watch>(watches[0])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
@@ -43,7 +45,7 @@ export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] })
           {/* Eyebrow & Badges */}
           <div className="flex items-center justify-between mb-6 relative z-10">
             <span className="font-cabin text-[10px] uppercase tracking-[0.16em] text-[#1dd8e1] font-bold bg-[#0a0d0f] px-3 py-1 rounded-[2px]">
-              Modelo Destacado de Taller
+              {t.featuredShowcase.badge}
             </span>
             {activeHeroWatch.reference && (
               <span className="font-mono text-[11px] text-[#2e3438] bg-[#f7f7f7] border border-[#d5d6d7] px-2.5 py-0.5 rounded-[2px]">
@@ -70,12 +72,12 @@ export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] })
                 </h3>
                 {activeHeroWatch.caliber && (
                   <p className="font-cabin text-[11px] uppercase tracking-wider text-[#2e3438] mt-1.5">
-                    Calibre: <span className="text-[#0a0d0f] font-semibold">{activeHeroWatch.caliber.split('(')[0]}</span> • Caja: {activeHeroWatch.caseSize?.split('(')[0] || 'Acero 316L'}
+                    {t.featuredShowcase.caliberLabel} <span className="text-[#0a0d0f] font-semibold">{activeHeroWatch.caliber.split('(')[0]}</span> • {t.featuredShowcase.caseLabel} {activeHeroWatch.caseSize?.split('(')[0] || t.featuredShowcase.caseDefault}
                   </p>
                 )}
               </div>
               <div className="text-left sm:text-right shrink-0">
-                <span className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] block">Inversión</span>
+                <span className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] block">{t.featuredShowcase.investment}</span>
                 <span className="font-poppins text-2xl font-bold text-[#0a0d0f] tabular-nums">
                   ${activeHeroWatch.price.toFixed(0)} <span className="text-xs font-normal text-[#2e3438]">USD</span>
                 </span>
@@ -93,13 +95,13 @@ export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] })
                 href={`/catalog/${activeHeroWatch.slug}`}
                 className="btn-teal justify-center py-3.5 text-[11px]"
               >
-                Ver Ficha Técnica Completa →
+                {t.featuredShowcase.viewSpecs}
               </Link>
               <Link
                 href="/configurator"
                 className="btn-outline-dark justify-center py-3.5 text-[11px]"
               >
-                Personalizar este Estilo
+                {t.featuredShowcase.customizeStyle}
               </Link>
             </div>
           </div>
@@ -109,10 +111,10 @@ export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] })
         <div className="lg:col-span-5 flex flex-col gap-5 justify-between">
           <div className="flex items-center justify-between pb-2 border-b border-[#d5d6d7]">
             <span className="font-cabin text-[11px] uppercase tracking-[0.14em] text-[#2e3438] font-semibold">
-              Otras Piezas en Taller ({supportingWatches.length})
+              {t.featuredShowcase.otherPieces} ({supportingWatches.length})
             </span>
             <span className="font-cabin text-[10px] text-[#1dd8e1] font-bold uppercase tracking-wider">
-              Toca para inspeccionar
+              {t.featuredShowcase.clickToInspect}
             </span>
           </div>
 
@@ -167,7 +169,7 @@ export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] })
                     </span>
 
                     <span className="font-cabin text-[10px] uppercase tracking-wider text-[#0a0d0f] font-bold group-hover:text-[#1dd8e1]">
-                      Inspeccionar ↑
+                      {t.featuredShowcase.viewDetail}
                     </span>
                   </div>
                 </div>
@@ -180,7 +182,7 @@ export default function FeaturedWatchShowcase({ watches }: { watches: Watch[] })
               href="/catalog"
               className="w-full btn-outline-dark justify-center py-3 text-[11px] block text-center"
             >
-              Explorar Catálogo Completo (6 Modelos) →
+              {t.featuredShowcase.exploreCatalog}
             </Link>
           </div>
         </div>

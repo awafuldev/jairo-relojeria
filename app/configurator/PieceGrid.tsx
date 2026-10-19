@@ -41,15 +41,15 @@ export default function PieceGrid() {
       <div className="flex flex-col items-center justify-center py-24">
         <div className="w-5 h-5 border-2 border-[#d5d6d7] border-t-[#1dd8e1] rounded-full animate-spin mb-3" />
         <span className="font-cabin text-[11px] uppercase tracking-wider text-[#2e3438]">
-          Cargando catálogo de {currentCategory?.name}...
+          {t.configurator.loadingCatalog}
         </span>
       </div>
     )
   }
 
   // Compatible pieces first
-  const compatible = availablePieces.filter(p => compatiblePartIds.includes(p.id))
-  const incompatible = availablePieces.filter(p => !compatiblePartIds.includes(p.id))
+  const compatible = availablePieces.filter((p) => compatiblePartIds.includes(p.id))
+  const incompatible = availablePieces.filter((p) => !compatiblePartIds.includes(p.id))
 
   const handleSelect = (piece: PieceData) => {
     if (!compatiblePartIds.includes(piece.id)) return
@@ -64,13 +64,13 @@ export default function PieceGrid() {
         <div className="fixed inset-0 z-50 bg-[#0a0d0f]/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#ffffff] border border-[#d5d6d7] rounded-[3px] max-w-md w-full p-6 shadow-2xl">
             <span className="font-cabin text-[10px] uppercase tracking-[0.14em] text-[#dc2626] font-semibold block mb-1">
-              Aviso de Compatibilidad Física
+              {t.configurator.invalidationTitle}
             </span>
             <h3 className="editorial-title text-[18px] text-[#0a0d0f] mb-3">
-              ¿Cambiar a {pendingInvalidation.newPiece.name}?
+              {t.configurator.invalidationQuestion} {pendingInvalidation.newPiece.name}?
             </h3>
             <p className="text-[13px] text-[#2e3438] font-poppins mb-4 leading-relaxed">
-              Al seleccionar este componente, las siguientes piezas previas dejarán de ser compatibles mecánicamente y serán reajustadas:
+              {t.configurator.invalidationDesc}
             </p>
 
             <div className="p-3.5 bg-[#f7f7f7] rounded-[3px] border border-[#d5d6d7] mb-6 space-y-2 text-[12px] font-poppins">
@@ -88,14 +88,14 @@ export default function PieceGrid() {
                 onClick={confirmInvalidationChange}
                 className="btn-teal flex-1 justify-center py-2.5 text-[11px]"
               >
-                Reajustar y Continuar
+                {t.configurator.invalidationConfirm}
               </button>
               <button
                 type="button"
                 onClick={cancelInvalidationChange}
                 className="btn-outline-dark flex-1 justify-center py-2.5 text-[11px]"
               >
-                Mantener Actual
+                {t.configurator.invalidationCancel}
               </button>
             </div>
           </div>
@@ -108,30 +108,30 @@ export default function PieceGrid() {
           <div className="border border-[#d5d6d7] rounded-[3px] p-6 bg-[#ffffff] space-y-6">
             <div>
               <label className="font-cabin text-[11px] uppercase tracking-[0.12em] text-[#2e3438] font-semibold block mb-2">
-                Texto del Grabado Láser (Máx. 25 caracteres)
+                {t.configurator.laserTitle}
               </label>
               <input
                 type="text"
                 maxLength={25}
                 value={engravingText}
                 onChange={(e) => setEngravingText(e.target.value.toUpperCase())}
-                placeholder="EJ. JAIRO 2026 O TUS INICIALES"
+                placeholder={t.configurator.laserPlaceholder}
                 className="w-full px-4 py-3 border border-[#d5d6d7] rounded-[3px] text-[14px] font-mono tracking-widest uppercase focus:outline-none focus:border-[#1dd8e1]"
               />
               <p className="font-poppins text-[12px] text-[#2e3438] mt-1.5 leading-relaxed">
-                El texto se graba con láser de fibra óptica sobre el fondo de caja o la masa oscilante del calibre.
+                {t.configurator.laserDesc}
               </p>
             </div>
 
             <div>
               <label className="font-cabin text-[11px] uppercase tracking-[0.12em] text-[#2e3438] font-semibold block mb-2">
-                Estilo Tipográfico
+                {t.configurator.fontStyle}
               </label>
               <div className="grid grid-cols-3 gap-2.5">
                 {[
-                  { id: 'classic', label: 'Clásico Serif', sample: 'ROMAN SERIF' },
-                  { id: 'modern', label: 'Moderno Sans', sample: 'MONO SANS' },
-                  { id: 'script', label: 'Cursiva Script', sample: 'Italic Script' },
+                  { id: 'classic', label: t.configurator.fontClassic, sample: 'ROMAN SERIF' },
+                  { id: 'modern', label: t.configurator.fontModern, sample: 'MONO SANS' },
+                  { id: 'script', label: t.configurator.fontScript, sample: 'Italic Script' },
                 ].map(font => (
                   <button
                     key={font.id}
@@ -156,7 +156,7 @@ export default function PieceGrid() {
 
             <div className="pt-4 border-t border-[#f7f7f7] flex justify-between items-center text-[13px] font-poppins">
               <span className="font-cabin text-[11px] uppercase tracking-wider text-[#2e3438]">
-                Costo del Servicio Láser:
+                {t.configurator.laserCost}
               </span>
               <span className="font-semibold text-[#0a0d0f]">
                 {engravingText.trim().length > 0 ? '+$30 USD' : '$0 USD'}
@@ -270,7 +270,7 @@ export default function PieceGrid() {
                 {isOutOfStock && (
                   <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center">
                     <span className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] font-semibold bg-[#ffffff] px-2 py-1 border border-[#d5d6d7] rounded-[2px]">
-                      Agotado
+                      {t.configurator.outOfStock}
                     </span>
                   </div>
                 )}
@@ -295,7 +295,7 @@ export default function PieceGrid() {
                     {piece.price === 0 ? '+$0' : `+$${piece.price.toFixed(0)}`}
                   </span>
                   <span className="font-cabin text-[9px] uppercase tracking-wider text-[#1dd8e1] font-bold">
-                    ✓ Compatible
+                    {t.configurator.compatibleBadge}
                   </span>
                 </div>
               </div>
@@ -309,41 +309,44 @@ export default function PieceGrid() {
         <div className="mt-14 pt-8 border-t border-[#d5d6d7]">
           <div className="mb-4">
             <span className="font-cabin text-[11px] uppercase tracking-[0.14em] text-[#2e3438] font-semibold block">
-              Variantes No Compatibles ({incompatible.length})
+              {t.configurator.incompatibleTitle} ({incompatible.length})
             </span>
             <p className="text-[12px] text-[#2e3438] font-poppins mt-0.5">
-              Estas piezas requieren dimensiones, calibres o cajas distintas a las seleccionadas actualmente.
+              {t.configurator.incompatibleDesc}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 opacity-50">
             {incompatible.map((piece) => {
-              const reason = incompatibleParts[piece.id]?.reason || 'Incompatible con la configuración actual'
-              const isHovered = hoveredIncompat === piece.id
+              const rule = incompatibleParts[piece.id]
               const rawImg = piece.productImage || piece.compositionImage || piece.layerImage || '/images/products/case-sub-40-steel.png'
               const displayImg = rawImg.replace(/\.svg$/, '.png')
 
               return (
                 <div
                   key={piece.id}
+                  className="bg-[#ffffff] border border-[#d5d6d7] rounded-[3px] overflow-hidden cursor-not-allowed group relative"
                   onMouseEnter={() => setHoveredIncompat(piece.id)}
                   onMouseLeave={() => setHoveredIncompat(null)}
-                  className="bg-[#ffffff] border border-[#d5d6d7] rounded-[3px] flex flex-col justify-between overflow-hidden cursor-not-allowed relative"
                 >
-                  <div className="aspect-square bg-[#f7f7f7] p-4 relative flex items-center justify-center">
+                  <div className="aspect-square bg-[#f7f7f7] p-4 flex items-center justify-center relative grayscale">
                     <img
                       src={displayImg}
                       alt={piece.name}
-                      className="w-full h-full object-contain grayscale"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).src = '/images/products/case-sub-40-steel.png'
+                      }}
                     />
 
-                    {/* Explanatory Tooltip on Hover */}
-                    {isHovered && (
-                      <div className="absolute inset-0 bg-[#0a0d0f]/95 p-3 text-white flex flex-col items-center justify-center text-center">
+                    {hoveredIncompat === piece.id && (
+                      <div className="absolute inset-0 bg-[#0a0d0f]/90 p-3 flex flex-col justify-center items-center text-center transition-opacity">
                         <span className="font-cabin text-[9px] uppercase tracking-wider text-[#1dd8e1] font-bold mb-1">
-                          Incompatible
+                          {t.configurator.incompatibleTooltip}
                         </span>
-                        <p className="font-poppins text-[10px] leading-relaxed">{reason}</p>
+                        <p className="font-poppins text-[10px] text-white/90 leading-tight">
+                          {rule ? rule.reason : t.configurator.incompatibleTooltip}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -351,7 +354,7 @@ export default function PieceGrid() {
                   <div className="p-3">
                     <p className="font-poppins text-[11px] text-[#2e3438] truncate">{piece.name}</p>
                     <p className="font-cabin text-[9px] uppercase tracking-wider text-[#2e3438] mt-0.5">
-                      No compatible
+                      {t.configurator.incompatibleTooltip}
                     </p>
                   </div>
                 </div>

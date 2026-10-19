@@ -2,6 +2,8 @@
 
 import { useEffect, useCallback } from 'react'
 import { useConfiguratorStore } from '@/lib/store'
+import { useI18n } from '@/lib/i18n/context'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import WatchViewer from './WatchViewer'
 import StepNav from './StepNav'
 import PieceGrid from './PieceGrid'
@@ -9,6 +11,7 @@ import ConfiguratorSummary from './ConfiguratorSummary'
 import Link from 'next/link'
 
 export default function Configurator() {
+  const { t } = useI18n()
   const {
     categories,
     currentStepIndex,
@@ -68,15 +71,15 @@ export default function Configurator() {
             </Link>
             <span className="hidden sm:inline-block w-px h-4 bg-[#d5d6d7]" />
             <span className="hidden sm:inline-block font-cabin text-[10px] uppercase tracking-[0.14em] text-[#2e3438]">
-              Configurador Bespoke
+              {t.configurator.headerTitle}
             </span>
           </div>
 
-          {/* Right: Live Investment & Catalog Link */}
-          <div className="flex items-center gap-5">
+          {/* Right: Live Investment & Catalog Link & Language Switcher */}
+          <div className="flex items-center gap-3 sm:gap-5">
             <div className="text-right">
               <span className="font-cabin text-[9px] uppercase tracking-[0.12em] text-[#2e3438] block leading-none">
-                Inversión Estimada
+                {t.configurator.estimatedInvestment}
               </span>
               <span className="font-poppins text-[15px] font-semibold tabular-nums text-[#0a0d0f] leading-tight">
                 ${totalPrice.toFixed(0)}{' '}
@@ -87,8 +90,9 @@ export default function Configurator() {
               href="/catalog"
               className="hidden md:inline-flex items-center justify-center px-3.5 py-1.5 border border-[#d5d6d7] text-[#0a0d0f] hover:bg-[#f7f7f7] font-cabin text-[10px] uppercase tracking-[0.12em] rounded-[3px] transition-colors"
             >
-              Ver Catálogo
+              {t.configurator.viewCatalog}
             </Link>
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
