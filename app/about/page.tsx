@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import AboutClient from '@/components/AboutClient'
 
 export const metadata = {

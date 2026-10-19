@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "test:e2e": "node --experimental-strip-types scripts/test-e2e-scenario.js"
   },
   "dependencies": {

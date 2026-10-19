@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import PieceForm from '../PieceForm'
 
 export default function NewPiecePage() {
