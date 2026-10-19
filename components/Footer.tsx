@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useI18n } from '@/lib/i18n/context'
+import { getWhatsAppUrl } from '@/lib/whatsapp'
 
 export default function Footer() {
   const { t } = useI18n()
@@ -18,14 +19,24 @@ export default function Footer() {
             <p className="text-[13px] text-[#2e3438] max-w-sm leading-relaxed font-poppins">
               {t.footer.brandDesc}
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center gap-3">
               <a
                 href="https://www.instagram.com/jairorelojeria/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-cabin text-[11px] uppercase tracking-[0.1em] text-[#0a0d0f] hover:text-[#1dd8e1] transition-colors"
+                className="inline-flex items-center gap-1.5 font-cabin text-[11px] uppercase tracking-[0.1em] text-[#0a0d0f] hover:text-[#1dd8e1] transition-colors"
               >
-                <span>Instagram Oficial @jairorelojeria</span>
+                <span>Instagram @jairorelojeria</span>
+                <span>↗</span>
+              </a>
+              <span className="hidden sm:inline text-[#d5d6d7]">|</span>
+              <a
+                href={getWhatsAppUrl('¡Hola Jairo Relojería! Me comunico desde su sitio web.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-cabin text-[11px] uppercase tracking-[0.1em] text-[#25D366] hover:underline transition-colors font-medium"
+              >
+                <span>WhatsApp (+1 809-304-4536)</span>
                 <span>↗</span>
               </a>
             </div>

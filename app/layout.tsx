@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 }
 
 import { I18nProvider } from '@/lib/i18n/context'
+import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 
 export default function RootLayout({
   children,
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body className="bg-[#ffffff] text-[#0a0d0f] antialiased selection:bg-[#1dd8e1] selection:text-[#0a0d0f]">
         <I18nProvider>
           {children}
+          <FloatingWhatsApp />
         </I18nProvider>
       </body>
     </html>

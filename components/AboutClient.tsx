@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { useI18n } from '@/lib/i18n/context'
+import { getWhatsAppUrl } from '@/lib/whatsapp'
 
 export default function AboutClient() {
   const { t } = useI18n()
@@ -93,6 +94,20 @@ export default function AboutClient() {
                 className="text-[13px] font-poppins text-[#0a0d0f] hover:text-[#1dd8e1] underline underline-offset-4 transition-colors font-medium"
               >
                 @jairorelojeria (Canal Oficial) ↗
+              </a>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="font-cabin text-[11px] uppercase tracking-[0.12em] font-semibold text-[#0a0d0f] w-28">
+                WhatsApp:
+              </span>
+              <a
+                href={getWhatsAppUrl('¡Hola Jairo Relojería! Me comunico desde su página web para hacer una consulta sobre sus relojes y servicios.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[13px] font-poppins text-[#25D366] hover:underline underline-offset-4 transition-colors font-medium flex items-center gap-1.5"
+              >
+                +1 (809) 304-4536 (Atención Directa WhatsApp) ↗
               </a>
             </div>
 
