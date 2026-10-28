@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { prisma, ensureDbReady } from '@/lib/prisma'
 import Link from 'next/link'
 import { StatusBadge, formatPrice, formatDate } from '@/components/admin/AdminUtils'
 
@@ -12,69 +12,115 @@ export default async function AdminDashboardPage() {
     redirect('/admin/login')
   }
 
-  // 1. Core metrics from real database tables
-  const [
-    totalConfigs,
-    pendingOrdersCount,
-    inProgressCount,
-    completedCount,
-    totalPieces,
-    inactivePiecesCount,
-    lowStockPiecesCount,
-    totalCategories,
-    totalRules,
-    totalValuationAgg,
-  ] = await Promise.all([
-    prisma.configuration.count(),
-    prisma.configuration.count({
-      where: { status: { in: ['pending', 'ordered', 'saved'] } },
-    }),
-    prisma.configuration.count({
-      where: { status: 'in_progress' },
-    }),
-    prisma.configuration.count({
-      where: { status: { in: ['confirmed', 'completed'] } },
-    }),
-    prisma.piece.count(),
-    prisma.piece.count({ where: { isActive: false } }),
-    prisma.piece.count({ where: { stock: { lte: 2 } } }),
-    prisma.category.count(),
-    prisma.compatibilityRule.count(),
-    prisma.configuration.aggregate({
-      _sum: { totalPrice: true },
-      where: { status: { notIn: ['cancelled', 'draft'] } },
-    }),
-  ])
+  await ensureDbReady()
 
-  // Count Seiko watches in boutique
-  const watchCountRes = await prisma.$queryRawUnsafe<any[]>(`
-    SELECT count(*) as count FROM "WatchProduct"
-  `).catch(() => [{ count: 0 }])
-  const watchCount = Number(watchCountRes[0]?.count || 0)
+  // 1. Core metrics from real database tables with resilient fallbacks
+  let totalConfigs = 0
+  let pendingOrdersCount = 0
+  let inProgressCount = 0
+  let completedCount = 0
+  let totalPieces = 0
+  let inactivePiecesCount = 0
+  let lowStockPiecesCount = 0
+  let totalCategories = 0
+  let totalRules = 0
+  let totalRevenue = 0
+  let watchCount = 0
+  let recentOrders: any[] = []
 
-  // 2. Recent orders & configurations
-  const recentOrders = await prisma.configuration.findMany({
-    take: 6,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      items: {
-        include: {
-          piece: {
-            select: { id: true, name: true, sku: true, productImage: true, thumbnail: true },
-          },
-          category: {
-            select: { id: true, name: true, step: true },
+  try {
+    const [
+      cTotal,
+      cPending,
+      cProgress,
+      cCompleted,
+      pTotal,
+      pInactive,
+      pLowStock,
+      catTotal,
+      rulesTotal,
+      valAgg,
+    ] = await Promise.all([
+      prisma.configuration.count().catch(() => 0),
+      prisma.configuration.count({
+        where: { status: { in: ['pending', 'ordered', 'saved'] } },
+      }).catch(() => 0),
+      prisma.configuration.count({
+        where: { status: 'in_progress' },
+      }).catch(() => 0),
+      prisma.configuration.count({
+        where: { status: { in: ['confirmed', 'completed'] } },
+      }).catch(() => 0),
+      prisma.piece.count().catch(() => 0),
+      prisma.piece.count({ where: { isActive: false } }).catch(() => 0),
+      prisma.piece.count({ where: { stock: { lte: 2 } } }).catch(() => 0),
+      prisma.category.count().catch(() => 0),
+      prisma.compatibilityRule.count().catch(() => 0),
+      prisma.configuration.aggregate({
+        _sum: { totalPrice: true },
+        where: { status: { notIn: ['cancelled', 'draft'] } },
+      }).catch(() => ({ _sum: { totalPrice: 0 } })),
+    ])
+
+    totalConfigs = cTotal
+    pendingOrdersCount = cPending
+    inProgressCount = cProgress
+    completedCount = cCompleted
+    totalPieces = pTotal
+    inactivePiecesCount = pInactive
+    lowStockPiecesCount = pLowStock
+    totalCategories = catTotal
+    totalRules = rulesTotal
+    totalRevenue = valAgg._sum.totalPrice || 0
+
+    // Count Seiko watches in boutique
+    const watchCountRes = await prisma.$queryRawUnsafe<any[]>(`
+      SELECT count(*) as count FROM "WatchProduct"
+    `).catch(() => [{ count: 0 }])
+    watchCount = Number(watchCountRes[0]?.count || 0)
+
+    // 2. Recent orders & configurations
+    recentOrders = await prisma.configuration.findMany({
+      take: 6,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        items: {
+          include: {
+            piece: {
+              select: { id: true, name: true, sku: true, productImage: true, thumbnail: true },
+            },
+            category: {
+              select: { id: true, name: true, step: true },
+            },
           },
         },
+        statusLogs: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
       },
-      statusLogs: {
+    }).catch(async (e) => {
+      console.warn('Fallback loading configurations without statusLogs:', e)
+      return prisma.configuration.findMany({
+        take: 6,
         orderBy: { createdAt: 'desc' },
-        take: 1,
-      },
-    },
-  })
-
-  const totalRevenue = totalValuationAgg._sum.totalPrice || 0
+        include: {
+          items: {
+            include: {
+              piece: {
+                select: { id: true, name: true, sku: true, productImage: true, thumbnail: true },
+              },
+              category: {
+                select: { id: true, name: true, step: true },
+              },
+            },
+          },
+        },
+      }).then(list => list.map(item => ({ ...item, statusLogs: [] }))).catch(() => [])
+    })
+  } catch (err) {
+    console.error('AdminDashboard data loading error:', err)
+  }
 
   return (
     <div className="admin-page font-poppins selection:bg-[#1dd8e1] selection:text-[#0a0d0f]">

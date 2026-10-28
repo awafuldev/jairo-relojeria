@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { prisma, ensureDbReady } from '@/lib/prisma'
 import Link from 'next/link'
 import { StatusBadge, formatPrice, formatDate } from '@/components/admin/AdminUtils'
 
@@ -19,6 +19,8 @@ export default async function AdminOrdersPage({ searchParams }: OrdersPageProps)
   if (!session) {
     redirect('/admin/login')
   }
+
+  await ensureDbReady()
 
   const { status, search, page } = await searchParams
   const currentPage = Math.max(1, parseInt(page || '1'))

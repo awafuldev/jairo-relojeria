@@ -3,7 +3,6 @@ import { prisma } from './prisma'
 import crypto from 'crypto'
 
 const SESSION_COOKIE = 'chrono_admin_session'
-// WARNING: Set NEXTAUTH_SECRET environment variable in production! The fallback below is for development only.
 const SECRET = process.env.NEXTAUTH_SECRET || 'chrono-luxury-watchmaking-secret-key-2026'
 
 export function signToken(data: string): string {
@@ -12,29 +11,46 @@ export function signToken(data: string): string {
 }
 
 export function verifyToken(token: string): string | null {
-  const [data, sig] = token.split('.')
-  if (!data || !sig) return null
-  const expected = crypto.createHmac('sha256', SECRET).update(data).digest('hex')
-  if (crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
-    return data
+  try {
+    const [data, sig] = token.split('.')
+    if (!data || !sig) return null
+    const expected = crypto.createHmac('sha256', SECRET).update(data).digest('hex')
+    const sigBuf = Buffer.from(sig)
+    const expBuf = Buffer.from(expected)
+    
+    // Prevent RangeError: Input buffers must have the same byte length
+    if (sigBuf.length !== expBuf.length) {
+      return null
+    }
+    
+    if (crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return data
+    }
+    return null
+  } catch {
+    return null
   }
-  return null
 }
 
 export async function auth() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get(SESSION_COOKIE)?.value
-  if (!token) return null
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get(SESSION_COOKIE)?.value
+    if (!token) return null
 
-  const userId = verifyToken(token)
-  if (!userId) return null
+    const userId = verifyToken(token)
+    if (!userId) return null
 
-  const user = await prisma.adminUser.findUnique({
-    where: { id: userId },
-    select: { id: true, email: true, name: true }
-  })
+    const user = await prisma.adminUser.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true }
+    })
 
-  return user
+    return user
+  } catch (err) {
+    console.error('Error verifying admin session:', err)
+    return null
+  }
 }
 
 export async function setAdminSession(userId: string) {
@@ -50,6 +66,10 @@ export async function setAdminSession(userId: string) {
 }
 
 export async function clearAdminSession() {
-  const cookieStore = await cookies()
-  cookieStore.delete(SESSION_COOKIE)
+  try {
+    const cookieStore = await cookies()
+    cookieStore.delete(SESSION_COOKIE)
+  } catch (err) {
+    console.error('Error clearing admin session:', err)
+  }
 }
