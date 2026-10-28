@@ -35,12 +35,12 @@ export default function AdminCompatibilityPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [rules, setRules] = useState<CompatRule[]>([])
   const [selectedPieceId, setSelectedPieceId] = useState<string>('')
+  const [searchPiece, setSearchPiece] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [savedSuccess, setSavedSuccess] = useState(false)
 
   // Local state of selected piece IDs per target category
-  // Record<targetCategoryId, string[]> (array of compatible piece IDs)
   const [compatMap, setCompatMap] = useState<Record<string, string[]>>({})
 
   const loadData = async () => {
@@ -49,7 +49,7 @@ export default function AdminCompatibilityPage() {
       const [resPieces, resCats, resRules] = await Promise.all([
         fetch('/api/admin/pieces'),
         fetch('/api/admin/categories'),
-        fetch('/api/admin/compatibility')
+        fetch('/api/admin/compatibility'),
       ])
 
       const piecesData = await resPieces.json()
@@ -74,7 +74,6 @@ export default function AdminCompatibilityPage() {
     loadData()
   }, [])
 
-  // Whenever selected piece changes, parse rules for that piece into compatMap
   useEffect(() => {
     if (!selectedPieceId) return
 
@@ -91,14 +90,10 @@ export default function AdminCompatibilityPage() {
   }, [selectedPieceId, rules])
 
   const selectedPiece = pieces.find(p => p.id === selectedPieceId)
-
-  // Filter out the selected piece's own category from targets
   const targetCategories = categories.filter(c => c.id !== selectedPiece?.categoryId)
 
   const togglePieceCompat = (targetCatId: string, targetPieceId: string) => {
     const currentList = compatMap[targetCatId]
-
-    // If undefined or null, it was universal (all compatible). Initialize with all pieces from that category
     const piecesInCat = pieces.filter(p => p.categoryId === targetCatId).map(p => p.id)
     const activeList = currentList !== undefined ? currentList : piecesInCat
 
@@ -111,7 +106,7 @@ export default function AdminCompatibilityPage() {
 
     setCompatMap(prev => ({
       ...prev,
-      [targetCatId]: updated
+      [targetCatId]: updated,
     }))
   }
 
@@ -119,7 +114,7 @@ export default function AdminCompatibilityPage() {
     const piecesInCat = pieces.filter(p => p.categoryId === targetCatId).map(p => p.id)
     setCompatMap(prev => ({
       ...prev,
-      [targetCatId]: makeCompatible ? piecesInCat : []
+      [targetCatId]: makeCompatible ? piecesInCat : [],
     }))
   }
 
@@ -129,18 +124,15 @@ export default function AdminCompatibilityPage() {
     setSavedSuccess(false)
 
     try {
-      // Find existing rules for this piece and remove them
       const existingPieceRules = rules.filter(r => r.pieceId === selectedPieceId)
       for (const r of existingPieceRules) {
         await fetch(`/api/admin/compatibility?id=${r.id}`, { method: 'DELETE' })
       }
 
-      // Create new rules for each category that has a restricted whitelist
       for (const targetCat of targetCategories) {
         const selectedIds = compatMap[targetCat.id]
         const allPiecesInCat = pieces.filter(p => p.categoryId === targetCat.id)
 
-        // Only create a rule if it's restricted (not all pieces selected)
         if (selectedIds !== undefined && selectedIds.length < allPiecesInCat.length) {
           await fetch('/api/admin/compatibility', {
             method: 'POST',
@@ -150,18 +142,17 @@ export default function AdminCompatibilityPage() {
               targetCategoryId: targetCat.id,
               ruleType: 'whitelist',
               targetPieceIds: selectedIds,
-              description: `Compatible sólo con ciertas opciones de ${targetCat.name}`
-            })
+              description: `Compatible exclusivamente con las opciones validadas de ${targetCat.name}`,
+            }),
           })
         }
       }
 
-      // Refresh rules
       const resRules = await fetch('/api/admin/compatibility')
       const rulesData = await resRules.json()
       setRules(rulesData || [])
       setSavedSuccess(true)
-      setTimeout(() => setSavedSuccess(false), 3000)
+      setTimeout(() => setSavedSuccess(false), 3500)
     } catch (err) {
       console.error(err)
     } finally {
@@ -169,60 +160,111 @@ export default function AdminCompatibilityPage() {
     }
   }
 
+  const filteredPieces = pieces.filter(p =>
+    p.name.toLowerCase().includes(searchPiece.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchPiece.toLowerCase()) ||
+    p.category?.name.toLowerCase().includes(searchPiece.toLowerCase())
+  )
+
   return (
-    <div className="p-8 max-w-5xl pb-24">
+    <div className="admin-page font-poppins selection:bg-[#1dd8e1] selection:text-[#0a0d0f] pb-24">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#e5e4e2]">
         <div>
-          <p className="caption text-[#a5a7a8] mb-1">Motor de Reglas Físicas</p>
-          <h1 className="heading-lg">Gestor de Compatibilidad</h1>
+          <span className="font-cabin text-[10px] uppercase tracking-[0.16em] text-[#78716c] font-semibold block mb-1">
+            Mecánica de Precisión · Jairo Relojería
+          </span>
+          <h1 className="font-jost text-2xl sm:text-3xl font-bold text-[#1c1917] tracking-tight">
+            Motor de Compatibilidad Física
+          </h1>
+          <p className="text-[13px] text-[#78716c] mt-1">
+            Garantiza que coronas, biseles, calibres y cajas encajen mecánicamente sin holguras ni desajustes.
+          </p>
         </div>
+
         <button
           onClick={handleSaveCompatibility}
           disabled={saving}
-          className="btn-primary self-start"
+          className="admin-btn admin-btn-primary self-start"
         >
-          {saving ? 'Guardando...' : savedSuccess ? '✓ Guardado con éxito' : 'Guardar Reglas'}
+          {saving ? 'Guardando en Servidor...' : savedSuccess ? '✓ Reglas Físicas Guardadas' : 'Guardar Reglas Físicas'}
         </button>
       </div>
 
-      <div className="bg-[#ededed] p-4 rounded-[2px] mb-8 border border-[#dbdbdb] text-[13px] text-[#484a4c]">
-        <p className="font-medium text-black mb-1">¿Cómo funciona?</p>
-        <p>
-          Selecciona una pieza principal (ejemplo: una Caja). A continuación marca con casillas de verificación cuáles piezas son físicamente compatibles con ella. Las piezas no marcadas aparecerán automáticamente deshabilitadas para el cliente con una explicación clara y sin términos técnicos.
+      {/* Explanatory Banner with Clear Icons */}
+      <div className="bg-white p-5 rounded-[4px] mb-8 border border-[#e5e4e2] text-[13px] text-[#1c1917] shadow-xs">
+        <h3 className="font-jost font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#1dd8e1]" />
+          ¿Cómo funciona la validación en tiempo real?
+        </h3>
+        <p className="text-[#78716c] leading-relaxed mb-3">
+          1. Selecciona la pieza motriz a la izquierda (ejemplo: una Caja de 40mm).<br />
+          2. En cada categoría de ensamble, marca las piezas con <strong className="text-green-800">«✓ Compatible»</strong>. Aquellas no seleccionadas quedarán automáticamente marcadas como <strong className="text-[#78716c]">«✕ No compatible»</strong> para el cliente.<br />
+          3. Si el cliente cambia la caja en el configurador, el sistema invalida en cascada las piezas no aptas para evitar órdenes fallidas.
         </p>
+        <div className="flex items-center gap-4 text-xs font-cabin uppercase font-bold pt-1 border-t border-[#e5e4e2]">
+          <span className="text-[#166534] flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#166534]" />
+            Verde = Físicamente Compatible
+          </span>
+          <span className="text-[#78716c] flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#78716c]" />
+            Gris = No Compatible (Bloqueado)
+          </span>
+        </div>
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-[#a5a7a8] text-[13px]">Cargando matriz de compatibilidad...</div>
+        <div className="admin-card admin-empty">
+          <p className="admin-empty-title">Cargando matriz física de ensamble...</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left: Piece Selector */}
-          <div className="border border-[#dbdbdb] rounded-[2px] p-4 bg-white md:col-span-1 h-fit">
-            <label className="caption text-[#686c6d] block mb-2 font-medium">1. Seleccionar Pieza:</label>
-            <div className="space-y-1 max-h-[600px] overflow-y-auto">
-              {pieces.map(piece => {
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          {/* Left Column (4 cols): Source Piece Selector */}
+          <div className="md:col-span-4 admin-card p-4 space-y-3">
+            <div className="pb-2 border-b border-[#e5e4e2]">
+              <label className="admin-label">1. Seleccionar Pieza Base</label>
+              <input
+                type="text"
+                placeholder="Filtrar por nombre, SKU o categoría..."
+                value={searchPiece}
+                onChange={(e) => setSearchPiece(e.target.value)}
+                className="admin-input text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5 max-h-[580px] overflow-y-auto pr-1">
+              {filteredPieces.map(piece => {
                 const isSelected = piece.id === selectedPieceId
                 const ruleCount = rules.filter(r => r.pieceId === piece.id).length
+
                 return (
                   <button
                     key={piece.id}
                     onClick={() => setSelectedPieceId(piece.id)}
-                    className={`w-full text-left p-2.5 rounded-[2px] transition-colors flex items-center justify-between ${
-                      isSelected ? 'bg-black text-white' : 'hover:bg-[#ededed] text-[#262626]'
+                    className={`w-full text-left p-3 rounded-[3px] transition-all flex items-center justify-between border cursor-pointer ${
+                      isSelected
+                        ? 'border-[#1c1917] bg-[#1c1917] text-white shadow-xs'
+                        : 'border-[#e5e4e2] bg-white hover:bg-[#fafaf9] text-[#1c1917]'
                     }`}
                   >
                     <div className="min-w-0 pr-2">
-                      <p className="text-[13px] truncate">{piece.name}</p>
-                      <p className={`caption truncate ${isSelected ? 'text-[#a5a7a8]' : 'text-[#686c6d]'}`}>
-                        {piece.category?.name} · {piece.sku}
+                      <p className="text-[13px] font-medium truncate">{piece.name}</p>
+                      <p className={`text-[11px] font-mono truncate ${isSelected ? 'text-[#1dd8e1]' : 'text-[#78716c]'}`}>
+                        {piece.sku} · {piece.category?.name}
                       </p>
                     </div>
-                    {ruleCount > 0 && (
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-[1px] shrink-0 ${
-                        isSelected ? 'bg-[#262626] text-white' : 'bg-[#dbdbdb] text-[#484a4c]'
+                    {ruleCount > 0 ? (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-[2px] font-cabin uppercase font-bold shrink-0 ${
+                        isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
                       }`}>
                         {ruleCount} regla(s)
+                      </span>
+                    ) : (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-[2px] font-cabin uppercase font-semibold shrink-0 ${
+                        isSelected ? 'bg-white/10 text-white/70' : 'bg-[#e5e4e2] text-[#78716c]'
+                      }`}>
+                        Universal
                       </span>
                     )}
                   </button>
@@ -231,16 +273,18 @@ export default function AdminCompatibilityPage() {
             </div>
           </div>
 
-          {/* Right: Compatibility Checklist */}
-          <div className="md:col-span-2 space-y-6">
+          {/* Right Column (8 cols): Compatibility Matrix Checklist */}
+          <div className="md:col-span-8 space-y-6">
             {selectedPiece ? (
               <>
-                <div className="border border-[#dbdbdb] p-4 rounded-[2px] bg-white flex items-center justify-between">
-                  <div>
-                    <span className="caption text-[#a5a7a8]">Definiendo compatibilidad para:</span>
-                    <h2 className="heading text-[16px] text-black">{selectedPiece.name}</h2>
-                    <p className="caption text-[#686c6d] font-mono">{selectedPiece.sku} ({selectedPiece.category?.name})</p>
-                  </div>
+                <div className="admin-card p-5 bg-[#fafaf9] border-l-4 border-l-[#1c1917]">
+                  <span className="admin-subtitle">Configurando Reglas para:</span>
+                  <h2 className="font-jost font-bold text-lg text-[#1c1917] mt-0.5">
+                    {selectedPiece.name}
+                  </h2>
+                  <p className="font-mono text-xs text-[#78716c] mt-1">
+                    SKU: {selectedPiece.sku} · Categoría: {selectedPiece.category?.name}
+                  </p>
                 </div>
 
                 {targetCategories.map(cat => {
@@ -248,63 +292,77 @@ export default function AdminCompatibilityPage() {
                   if (piecesInCat.length === 0) return null
 
                   const allowedIds = compatMap[cat.id]
-                  // If undefined, all are compatible
                   const isUniversal = allowedIds === undefined
+                  const compatibleCount = isUniversal ? piecesInCat.length : allowedIds.length
 
                   return (
-                    <div key={cat.id} className="border border-[#dbdbdb] rounded-[2px] p-5 bg-white space-y-4">
-                      <div className="flex items-center justify-between border-b border-[#dbdbdb] pb-3">
+                    <div key={cat.id} className="admin-card p-5 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#e5e4e2] gap-2">
                         <div>
-                          <h3 className="text-[14px] font-medium text-black">
-                            {cat.name} ({piecesInCat.length})
+                          <h3 className="font-jost font-bold text-base text-[#1c1917]">
+                            Paso {cat.step}: {cat.name} ({piecesInCat.length} opciones)
                           </h3>
-                          <p className="caption text-[#a5a7a8]">
+                          <p className="text-[11px] text-[#78716c] font-cabin">
                             {isUniversal
-                              ? 'Universal (todas son compatibles actualmente)'
-                              : `${allowedIds.length} de ${piecesInCat.length} compatibles`}
+                              ? '✓ Universal: todas las piezas de esta categoría son compatibles.'
+                              : `${compatibleCount} de ${piecesInCat.length} piezas marcadas como compatibles.`}
                           </p>
                         </div>
+
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => setAllInCat(cat.id, true)}
-                            className="caption text-[#484a4c] hover:text-black underline"
+                            className="text-[11px] font-cabin uppercase font-bold text-[#166534] hover:underline"
                           >
-                            Marcar Todas
+                            ✓ Todas Compatibles
                           </button>
-                          <span className="text-[#dbdbdb]">|</span>
+                          <span className="text-[#e5e4e2]">|</span>
                           <button
                             type="button"
                             onClick={() => setAllInCat(cat.id, false)}
-                            className="caption text-[#484a4c] hover:text-black underline"
+                            className="text-[11px] font-cabin uppercase font-bold text-[#78716c] hover:underline"
                           >
-                            Desmarcar Todas
+                            ✕ Desmarcar Todas
                           </button>
                         </div>
                       </div>
 
-                      {/* Checkbox grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px]">
+                      {/* Items Grid with Clear Badges */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {piecesInCat.map(p => {
-                          const isChecked = isUniversal || (allowedIds && allowedIds.includes(p.id))
+                          const isCompatible = isUniversal || (allowedIds && allowedIds.includes(p.id))
+
                           return (
                             <label
                               key={p.id}
-                              className={`flex items-start gap-3 p-2.5 rounded-[2px] border transition-colors cursor-pointer ${
-                                isChecked
-                                  ? 'border-black bg-[#fafafa]'
-                                  : 'border-[#dbdbdb] bg-white opacity-60'
+                              onClick={() => togglePieceCompat(cat.id, p.id)}
+                              className={`flex items-start gap-3 p-3 rounded-[4px] border transition-all cursor-pointer ${
+                                isCompatible
+                                  ? 'border-[#166534] bg-green-50/40 text-[#1c1917] shadow-2xs'
+                                  : 'border-[#e5e4e2] bg-white opacity-60 text-[#78716c]'
                               }`}
                             >
                               <input
                                 type="checkbox"
-                                checked={!!isChecked}
-                                onChange={() => togglePieceCompat(cat.id, p.id)}
-                                className="w-4 h-4 mt-0.5 rounded-[2px] accent-black shrink-0"
+                                checked={!!isCompatible}
+                                onChange={() => {}} // handled by label onClick
+                                className="w-4 h-4 mt-0.5 rounded-[2px] accent-[#166534] shrink-0 pointer-events-none"
                               />
-                              <div className="min-w-0">
-                                <p className="font-normal text-black leading-snug">{p.name}</p>
-                                <p className="caption text-[#686c6d] font-mono text-[11px]">{p.sku}</p>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-1">
+                                  <p className="text-[13px] font-medium leading-tight truncate">
+                                    {p.name}
+                                  </p>
+                                  <span className={`text-[9px] font-cabin font-bold uppercase shrink-0 px-1 py-0.2 rounded-[2px] ${
+                                    isCompatible ? 'text-[#166534] bg-green-100' : 'text-[#78716c] bg-[#e5e4e2]'
+                                  }`}>
+                                    {isCompatible ? 'Compatible' : 'No apta'}
+                                  </span>
+                                </div>
+                                <p className="font-mono text-[11px] text-[#78716c] mt-0.5">
+                                  {p.sku}
+                                </p>
                               </div>
                             </label>
                           )
@@ -315,8 +373,11 @@ export default function AdminCompatibilityPage() {
                 })}
               </>
             ) : (
-              <div className="py-20 text-center text-[#a5a7a8] text-[13px] border border-[#dbdbdb] rounded-[2px]">
-                Selecciona una pieza a la izquierda para configurar sus compatibilidades.
+              <div className="admin-card admin-empty">
+                <p className="admin-empty-title">Selecciona una pieza a la izquierda</p>
+                <p className="text-[12px] max-w-sm mt-1">
+                  Elige una caja, bisel o movimiento para visualizar y editar sus reglas físicas de ensamble.
+                </p>
               </div>
             )}
           </div>

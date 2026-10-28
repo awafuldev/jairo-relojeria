@@ -7,7 +7,7 @@ export default function AdminSettingsPage() {
     brandName: '',
     currency: 'USD',
     contactEmail: '',
-    baseWatchPrice: '0'
+    baseWatchPrice: '0',
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -22,7 +22,7 @@ export default function AdminSettingsPage() {
 
   const handleUpdateCredentials = async () => {
     if (!currentPassword) {
-      setCredMsg({ text: 'Por favor introduce tu contraseña actual para confirmar', type: 'error' })
+      setCredMsg({ text: 'Por favor introduce tu contraseña actual para confirmar el cambio', type: 'error' })
       return
     }
     setCredSaving(true)
@@ -39,7 +39,7 @@ export default function AdminSettingsPage() {
       })
       const data = await res.json()
       if (res.ok) {
-        setCredMsg({ text: data.message || 'Credenciales actualizadas exitosamente', type: 'success' })
+        setCredMsg({ text: data.message || '✓ Credenciales actualizadas exitosamente', type: 'success' })
         setCurrentPassword('')
         setNewPassword('')
         setNewEmail('')
@@ -47,7 +47,7 @@ export default function AdminSettingsPage() {
         setCredMsg({ text: data.error || 'Error al actualizar credenciales', type: 'error' })
       }
     } catch {
-      setCredMsg({ text: 'Error de conexión', type: 'error' })
+      setCredMsg({ text: 'Error de conexión con el servidor', type: 'error' })
     } finally {
       setCredSaving(false)
     }
@@ -78,169 +78,201 @@ export default function AdminSettingsPage() {
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
+        body: JSON.stringify(settings),
       })
       if (res.ok) {
-        setMessage({ text: 'Settings saved successfully', type: 'success' })
+        setMessage({ text: '✓ Ajustes de la tienda guardados correctamente', type: 'success' })
       } else {
-        setMessage({ text: 'Failed to save settings', type: 'error' })
+        setMessage({ text: 'Error al guardar los ajustes', type: 'error' })
       }
-    } catch (error) {
-      setMessage({ text: 'An error occurred', type: 'error' })
+    } catch {
+      setMessage({ text: 'Error de comunicación', type: 'error' })
     }
     setSaving(false)
   }
 
-  if (loading) return <div className="p-8 text-[13px] text-[#686c6d]">Loading settings...</div>
+  if (loading) {
+    return (
+      <div className="admin-page">
+        <div className="admin-card admin-empty">
+          <p className="admin-empty-title">Cargando configuración del sistema...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-8 max-w-3xl">
-      <div className="mb-8 flex justify-between items-center">
+    <div className="admin-page font-poppins selection:bg-[#1dd8e1] selection:text-[#0a0d0f]">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#e5e4e2]">
         <div>
-          <p className="caption text-[#a5a7a8] mb-1">Ajustes del Sistema</p>
-          <h1 className="heading-lg">Configuración de la Tienda</h1>
+          <span className="font-cabin text-[10px] uppercase tracking-[0.16em] text-[#78716c] font-semibold block mb-1">
+            Sistema & Seguridad · Jairo Relojería
+          </span>
+          <h1 className="font-jost text-2xl sm:text-3xl font-bold text-[#1c1917] tracking-tight">
+            Configuración de la Plataforma
+          </h1>
+          <p className="text-[13px] text-[#78716c] mt-1">
+            Parámetros comerciales, moneda por defecto y credenciales seguras del administrador.
+          </p>
         </div>
+
         <button
           onClick={handleSave}
           disabled={saving}
-          className="btn-primary"
+          className="admin-btn admin-btn-primary self-start"
         >
-          {saving ? 'Guardando...' : 'Guardar Cambios'}
+          {saving ? 'Guardando...' : 'Guardar Ajustes'}
         </button>
       </div>
 
       {message.text && (
-        <div className={`mb-6 p-4 rounded-[2px] text-[13px] ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+        <div className={`mb-6 p-4 rounded-[4px] text-[13px] border ${message.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
           {message.text}
         </div>
       )}
 
-      <div className="space-y-6">
-        <div className="border border-[#dbdbdb] rounded-[2px] p-6 bg-white space-y-4 text-[13px]">
-          <h2 className="label text-[#262626]">Información de la Marca</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Brand & Commercial Settings */}
+        <div className="admin-card p-6 space-y-4">
+          <span className="admin-subtitle">Parámetros Comerciales</span>
+          <h2 className="admin-title text-base mb-3">Información de la Marca</h2>
+
           <div>
-            <label className="caption text-[#686c6d] block mb-1">Nombre de la Marca</label>
+            <label className="admin-label">Nombre Comercial</label>
             <input
               type="text"
               name="brandName"
               value={settings.brandName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] focus:outline-none focus:border-black"
+              className="admin-input"
             />
           </div>
+
           <div>
-            <label className="caption text-[#686c6d] block mb-1">Moneda Principal</label>
+            <label className="admin-label">Moneda de Facturación</label>
             <select
               name="currency"
               value={settings.currency}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] bg-white focus:outline-none focus:border-black"
+              className="admin-input"
             >
               <option value="USD">USD ($) - Dólares Estadounidenses</option>
               <option value="EUR">EUR (€) - Euros</option>
-              <option value="MXN">MXN ($) - Pesos Mexicanos</option>
+              <option value="COP">COP ($) - Pesos Colombianos</option>
+              <option value="DOP">DOP ($) - Pesos Dominicanos</option>
             </select>
           </div>
+
           <div>
-            <label className="caption text-[#686c6d] block mb-1">Email de Notificación de Pedidos</label>
+            <label className="admin-label">Email Oficial de Notificaciones</label>
             <input
               type="email"
               name="contactEmail"
               value={settings.contactEmail}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] focus:outline-none focus:border-black"
+              className="admin-input"
             />
           </div>
+
           <div>
-            <label className="caption text-[#686c6d] block mb-1">Precio Base del Reloj</label>
+            <label className="admin-label">Precio Base del Reloj (Ensamblado Inicial)</label>
             <input
               type="number"
               name="baseWatchPrice"
               value={settings.baseWatchPrice}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] focus:outline-none focus:border-black"
+              className="admin-input font-mono tabular-nums"
             />
           </div>
         </div>
 
-        <div className="border border-[#dbdbdb] rounded-[2px] p-6 bg-white space-y-4 text-[13px]">
-          <h2 className="label text-[#262626]">Motor de Configurador</h2>
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="enforceStrict"
-              defaultChecked
-              className="w-4 h-4 rounded-[2px] accent-black"
-            />
-            <label htmlFor="enforceStrict" className="text-[#262626]">
-              Bloqueo estricto de combinaciones incompatibles (recomendado)
-            </label>
-          </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="showUnavailable"
-              defaultChecked
-              className="w-4 h-4 rounded-[2px] accent-black"
-            />
-            <label htmlFor="showUnavailable" className="text-[#262626]">
-              Mostrar piezas incompatibles en gris con tooltip explicativo
-            </label>
-          </div>
-        </div>
+        {/* Engine Physics & Security Settings */}
+        <div className="space-y-8">
+          <div className="admin-card p-6 space-y-3">
+            <span className="admin-subtitle">Motor del Configurador</span>
+            <h2 className="admin-title text-base mb-2">Comportamiento del Taller</h2>
 
-        {/* Security / Credentials Section */}
-        <div className="border border-[#dbdbdb] rounded-[2px] p-6 bg-white space-y-4 text-[13px]">
-          <h2 className="label text-[#262626]">Seguridad de la Cuenta de Administrador</h2>
-          <p className="caption text-[#686c6d]">
-            Cambia tus credenciales de acceso al panel administrativo sin necesidad de tocar la base de datos manualmente.
-          </p>
-
-          {credMsg.text && (
-            <div className={`p-3 rounded-[2px] text-[12px] ${credMsg.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-              {credMsg.text}
+            <div className="flex items-start gap-3 p-3 bg-[#fafaf9] rounded-[4px] border border-[#e5e4e2]">
+              <input
+                type="checkbox"
+                id="enforceStrict"
+                defaultChecked
+                className="w-4 h-4 mt-0.5 rounded-[2px] accent-[#1c1917]"
+              />
+              <label htmlFor="enforceStrict" className="text-[12px] text-[#1c1917] leading-snug">
+                <strong>Bloqueo estricto de combinaciones incompatibles:</strong> Evita que un cliente guarde o solicite piezas mecánicamente inviables.
+              </label>
             </div>
-          )}
 
-          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-[#fafaf9] rounded-[4px] border border-[#e5e4e2]">
+              <input
+                type="checkbox"
+                id="showUnavailable"
+                defaultChecked
+                className="w-4 h-4 mt-0.5 rounded-[2px] accent-[#1c1917]"
+              />
+              <label htmlFor="showUnavailable" className="text-[12px] text-[#1c1917] leading-snug">
+                <strong>Mostrar piezas no aptas en gris:</strong> Informa al usuario visualmente por qué una pieza no encaja con la caja seleccionada.
+              </label>
+            </div>
+          </div>
+
+          {/* Admin Credentials */}
+          <div className="admin-card p-6 space-y-4">
+            <span className="admin-subtitle">Seguridad de la Cuenta</span>
+            <h2 className="admin-title text-base mb-1">Credenciales de Acceso</h2>
+            <p className="text-[12px] text-[#78716c] leading-relaxed">
+              Actualiza de forma segura el usuario o contraseña del panel sin tocar la base de datos.
+            </p>
+
+            {credMsg.text && (
+              <div className={`p-3 rounded-[4px] text-[12px] border ${credMsg.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'}`}>
+                {credMsg.text}
+              </div>
+            )}
+
             <div>
-              <label className="caption text-[#686c6d] block mb-1">Nuevo Correo Electrónico (Opcional)</label>
+              <label className="admin-label">Nuevo Correo Electrónico (Opcional)</label>
               <input
                 type="email"
-                placeholder="nuevo-admin@tudominio.com"
+                placeholder="nuevo-admin@jairorelojeria.com"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] focus:outline-none focus:border-black"
+                className="admin-input"
               />
             </div>
+
             <div>
-              <label className="caption text-[#686c6d] block mb-1">Nueva Contraseña (mínimo 6 caracteres)</label>
+              <label className="admin-label">Nueva Contraseña (mínimo 6 caracteres)</label>
               <input
                 type="password"
                 placeholder="••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] focus:outline-none focus:border-black"
+                className="admin-input"
               />
             </div>
+
             <div>
-              <label className="caption text-[#686c6d] block mb-1">Contraseña Actual * (Requerida para confirmar)</label>
+              <label className="admin-label">Contraseña Actual * (Requerida para confirmar)</label>
               <input
                 type="password"
                 placeholder="••••••••"
                 required
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-[#dbdbdb] rounded-[2px] focus:outline-none focus:border-black"
+                className="admin-input"
               />
             </div>
+
             <button
               type="button"
               onClick={handleUpdateCredentials}
               disabled={credSaving}
-              className="btn-primary text-[11px] py-2.5 px-4"
+              className="admin-btn admin-btn-primary w-full"
             >
-              {credSaving ? 'Actualizando...' : 'Actualizar Credenciales de Administrador'}
+              {credSaving ? 'Actualizando...' : 'Actualizar Credenciales'}
             </button>
           </div>
         </div>

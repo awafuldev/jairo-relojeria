@@ -274,3 +274,292 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   ADMIN PANEL DESIGN SYSTEM
+   ═══════════════════════════════════════════════ */
+
+/* Admin Color Tokens */
+:root {
+  --admin-bg: #FAFAF9;
+  --admin-surface: #FFFFFF;
+  --admin-border: #E5E4E2;
+  --admin-border-strong: #C9C8C5;
+  --admin-text: #1C1917;
+  --admin-text-muted: #78716C;
+  --admin-text-faint: #A8A29E;
+  --admin-nav-bg: #0F0E0D;
+  --admin-nav-active: #1C1917;
+  --admin-gold: #92680A;
+  --admin-gold-light: #FEF3C7;
+}
+
+/* Admin Page Wrapper */
+.admin-page {
+  padding: 2rem;
+  max-width: 1200px;
+}
+
+/* Admin Section Header */
+.admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.admin-title {
+  font-family: var(--font-jost);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--admin-text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.admin-subtitle {
+  font-family: var(--font-cabin);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+/* Admin Stats Cards */
+.admin-stat-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.admin-stat-card:hover {
+  border-color: var(--admin-border-strong);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.admin-stat-value {
+  font-family: var(--font-jost);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--admin-text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.admin-stat-label {
+  font-family: var(--font-cabin);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+  margin-top: 0.375rem;
+}
+
+/* Admin Table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.admin-table th {
+  font-family: var(--font-cabin);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+  padding: 0.625rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-bg);
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-text);
+  vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+  background: var(--admin-bg);
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Admin Form Elements */
+.admin-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  color: var(--admin-text);
+  background: var(--admin-surface);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+  font-family: var(--font-poppins);
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: var(--color-carbon-ink);
+  box-shadow: 0 0 0 3px rgba(10,13,15,0.08);
+}
+
+.admin-label {
+  font-family: var(--font-cabin);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted);
+  display: block;
+  margin-bottom: 0.375rem;
+}
+
+/* Admin Buttons */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-family: var(--font-cabin);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 140ms ease;
+  text-decoration: none;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.admin-btn-primary {
+  background: var(--admin-text);
+  color: #fff;
+  border-color: var(--admin-text);
+}
+
+.admin-btn-primary:hover {
+  background: #2D2A27;
+  border-color: #2D2A27;
+}
+
+.admin-btn-secondary {
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  border-color: var(--admin-border);
+}
+
+.admin-btn-secondary:hover {
+  border-color: var(--admin-border-strong);
+  background: var(--admin-surface);
+}
+
+.admin-btn-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-color: #FECACA;
+}
+
+.admin-btn-danger:hover {
+  background: #FCA5A5;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-family: var(--font-cabin);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* Admin Card/Panel */
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+}
+
+/* Empty State */
+.admin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--admin-text-faint);
+}
+
+.admin-empty-title {
+  font-family: var(--font-jost);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--admin-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+/* Admin Sidebar Navigation */
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-family: var(--font-cabin);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  transition: all 140ms ease;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.admin-nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+}
+
+.admin-nav-link.active {
+  background: rgba(255,255,255,0.12);
+  color: #FFFFFF;
+}
+
+.admin-nav-section {
+  font-family: var(--font-cabin);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  padding: 0 0.75rem;
+  margin-bottom: 0.25rem;
+  margin-top: 1.25rem;
+}
+

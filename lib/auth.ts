@@ -3,6 +3,7 @@ import { prisma } from './prisma'
 import crypto from 'crypto'
 
 const SESSION_COOKIE = 'chrono_admin_session'
+// WARNING: Set NEXTAUTH_SECRET environment variable in production! The fallback below is for development only.
 const SECRET = process.env.NEXTAUTH_SECRET || 'chrono-luxury-watchmaking-secret-key-2026'
 
 export function signToken(data: string): string {

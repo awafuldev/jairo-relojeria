@@ -1,168 +1,429 @@
 export const dynamic = 'force-dynamic'
+
 import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { StatusBadge, formatPrice, formatDate } from '@/components/admin/AdminUtils'
 
-export default async function AdminDashboard() {
+export default async function AdminDashboardPage() {
   const session = await auth()
+  if (!session) {
+    redirect('/admin/login')
+  }
 
-  const [pieceCount, categoryCount, configCount, ruleCount] = await Promise.all([
-    prisma.piece.count(),
-    prisma.category.count(),
+  // 1. Core metrics from real database tables
+  const [
+    totalConfigs,
+    pendingOrdersCount,
+    inProgressCount,
+    completedCount,
+    totalPieces,
+    inactivePiecesCount,
+    lowStockPiecesCount,
+    totalCategories,
+    totalRules,
+    totalValuationAgg,
+  ] = await Promise.all([
     prisma.configuration.count(),
+    prisma.configuration.count({
+      where: { status: { in: ['pending', 'ordered', 'saved'] } },
+    }),
+    prisma.configuration.count({
+      where: { status: 'in_progress' },
+    }),
+    prisma.configuration.count({
+      where: { status: { in: ['confirmed', 'completed'] } },
+    }),
+    prisma.piece.count(),
+    prisma.piece.count({ where: { isActive: false } }),
+    prisma.piece.count({ where: { stock: { lte: 2 } } }),
+    prisma.category.count(),
     prisma.compatibilityRule.count(),
+    prisma.configuration.aggregate({
+      _sum: { totalPrice: true },
+      where: { status: { notIn: ['cancelled', 'draft'] } },
+    }),
   ])
 
-  // Count Seiko watches in store
+  // Count Seiko watches in boutique
   const watchCountRes = await prisma.$queryRawUnsafe<any[]>(`
     SELECT count(*) as count FROM "WatchProduct"
-  `)
+  `).catch(() => [{ count: 0 }])
   const watchCount = Number(watchCountRes[0]?.count || 0)
 
-  const recentConfigs = await prisma.configuration.findMany({
-    take: 5,
+  // 2. Recent orders & configurations
+  const recentOrders = await prisma.configuration.findMany({
+    take: 6,
     orderBy: { createdAt: 'desc' },
-    include: { items: { include: { category: true, piece: true } } },
+    include: {
+      items: {
+        include: {
+          piece: {
+            select: { id: true, name: true, sku: true, productImage: true, thumbnail: true },
+          },
+          category: {
+            select: { id: true, name: true, step: true },
+          },
+        },
+      },
+      statusLogs: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
   })
 
+  const totalRevenue = totalValuationAgg._sum.totalPrice || 0
+
   return (
-    <div className="p-8 max-w-5xl font-poppins">
-      <div className="mb-8">
-        <span className="font-cabin text-[10px] uppercase tracking-[0.14em] text-[#1dd8e1] font-semibold block mb-1">
-          Taller & Tienda
-        </span>
-        <h1 className="editorial-title text-2xl sm:text-3xl text-[#0a0d0f] tracking-[0.08em]">
-          Panel de Control — Jairo Relojería
-        </h1>
-        <p className="text-[13px] text-[#2e3438] mt-1">
-          Administración centralizada de la tienda de relojes Seiko y del taller de personalización bespoke.
-        </p>
+    <div className="admin-page font-poppins selection:bg-[#1dd8e1] selection:text-[#0a0d0f]">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#e5e4e2]">
+        <div>
+          <span className="font-cabin text-[10px] uppercase tracking-[0.16em] text-[#78716c] font-semibold block mb-1">
+            Centro de Operaciones · Jairo Relojería
+          </span>
+          <h1 className="font-jost text-2xl sm:text-3xl font-bold text-[#1c1917] tracking-tight">
+            Dashboard del Taller
+          </h1>
+          <p className="text-[13px] text-[#78716c] mt-1">
+            Resumen en tiempo real de pedidos personalizados, modelos Seiko y componentes en taller.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/orders"
+            className="admin-btn admin-btn-secondary"
+          >
+            Ver Pedidos ({pendingOrdersCount} pendientes)
+          </Link>
+          <Link
+            href="/configurator"
+            target="_blank"
+            className="admin-btn admin-btn-primary"
+          >
+            + Nueva Configuración ↗
+          </Link>
+        </div>
       </div>
 
-      {/* Two-Tier Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+      {/* Useful Alerts */}
+      {(pendingOrdersCount > 0 || inactivePiecesCount > 0 || lowStockPiecesCount > 0) && (
+        <div className="space-y-2.5 mb-8">
+          {pendingOrdersCount > 0 && (
+            <div className="flex items-center justify-between p-3.5 bg-amber-50/80 border border-amber-200/80 rounded-[4px] text-[13px] text-amber-900">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span>
+                  Hay <strong>{pendingOrdersCount}</strong> {pendingOrdersCount === 1 ? 'pedido pendiente' : 'pedidos pendientes'} de confirmación o atención con el cliente.
+                </span>
+              </div>
+              <Link href="/admin/orders?status=pending" className="text-[11px] font-cabin uppercase font-bold tracking-wider underline hover:text-amber-950">
+                Atender Ahora →
+              </Link>
+            </div>
+          )}
+
+          {lowStockPiecesCount > 0 && (
+            <div className="flex items-center justify-between p-3.5 bg-red-50/70 border border-red-200/80 rounded-[4px] text-[13px] text-red-900">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <span>
+                  <strong>{lowStockPiecesCount}</strong> {lowStockPiecesCount === 1 ? 'componente tiene' : 'componentes tienen'} stock crítico (≤ 2 unidades disponibles en taller).
+                </span>
+              </div>
+              <Link href="/admin/pieces" className="text-[11px] font-cabin uppercase font-bold tracking-wider underline hover:text-red-950">
+                Revisar Inventario →
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Primary KPI Grid (All backed by verified database figures) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <Link
-          href="/admin/watches"
-          className="blok-card p-5 hover:border-[#0a0d0f] transition-all group col-span-2 md:col-span-1 bg-[#f7f7f7]"
+          href="/admin/orders"
+          className="admin-stat-card group"
         >
-          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#1dd8e1] font-bold block mb-1">Tienda</span>
-          <p className="font-jost text-3xl font-bold text-[#0a0d0f] tracking-tight group-hover:text-[#1dd8e1] transition-colors">
-            {watchCount}
-          </p>
-          <p className="font-cabin text-[11px] uppercase tracking-wider text-[#2e3438] mt-1 font-semibold">
-            Relojes Seiko
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#92680a] font-bold block mb-1">
+            Pedidos Activos
+          </span>
+          <div className="flex items-baseline justify-between">
+            <p className="admin-stat-value group-hover:text-[#92680a] transition-colors">
+              {pendingOrdersCount}
+            </p>
+            <span className="font-cabin text-[10px] text-[#78716c]">
+              de {totalConfigs} totales
+            </span>
+          </div>
+          <p className="admin-stat-label">
+            Pendientes de Confirmar
           </p>
         </Link>
 
-        {[
-          { label: 'Componentes', value: pieceCount, href: '/admin/pieces', tag: 'Taller' },
-          { label: 'Categorías', value: categoryCount, href: '/admin/categories', tag: 'Taller' },
-          { label: 'Diseños', value: configCount, href: '/admin/orders', tag: 'Bespoke' },
-          { label: 'Reglas Físicas', value: ruleCount, href: '/admin/compatibility', tag: 'Taller' },
-        ].map(stat => (
+        <Link
+          href="/admin/orders"
+          className="admin-stat-card group"
+        >
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#166534] font-bold block mb-1">
+            En Producción
+          </span>
+          <div className="flex items-baseline justify-between">
+            <p className="admin-stat-value group-hover:text-[#166534] transition-colors">
+              {inProgressCount + completedCount}
+            </p>
+            <span className="font-cabin text-[10px] text-[#78716c]">
+              {completedCount} completados
+            </span>
+          </div>
+          <p className="admin-stat-label">
+            En Taller / Finalizados
+          </p>
+        </Link>
+
+        <div className="admin-stat-card">
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#1c1917] font-bold block mb-1">
+            Valoración de Encargos
+          </span>
+          <p className="admin-stat-value text-[#92680a] tabular-nums">
+            {formatPrice(totalRevenue)}
+          </p>
+          <p className="admin-stat-label">
+            Volumen Total Estimado
+          </p>
+        </div>
+
+        <Link
+          href="/admin/watches"
+          className="admin-stat-card group"
+        >
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#78716c] font-bold block mb-1">
+            Tienda Boutique
+          </span>
+          <div className="flex items-baseline justify-between">
+            <p className="admin-stat-value group-hover:text-[#1c1917] transition-colors">
+              {watchCount}
+            </p>
+            <span className="font-cabin text-[10px] text-[#78716c]">
+              modelos Seiko
+            </span>
+          </div>
+          <p className="admin-stat-label">
+            Relojes Terminados
+          </p>
+        </Link>
+      </div>
+
+      {/* Workshop Infrastructure Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10 p-4 bg-white border border-[#e5e4e2] rounded-[4px]">
+        <Link href="/admin/pieces" className="hover:opacity-80 transition-opacity">
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#78716c] font-semibold block">
+            Piezas en Taller
+          </span>
+          <p className="font-jost text-xl font-bold text-[#1c1917] tabular-nums mt-0.5">
+            {totalPieces} <span className="text-xs font-normal text-[#78716c]">({inactivePiecesCount} inactivas)</span>
+          </p>
+        </Link>
+
+        <Link href="/admin/categories" className="hover:opacity-80 transition-opacity">
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#78716c] font-semibold block">
+            Etapas del Ensamble
+          </span>
+          <p className="font-jost text-xl font-bold text-[#1c1917] tabular-nums mt-0.5">
+            {totalCategories} <span className="text-xs font-normal text-[#78716c]">categorías</span>
+          </p>
+        </Link>
+
+        <Link href="/admin/compatibility" className="hover:opacity-80 transition-opacity">
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#78716c] font-semibold block">
+            Reglas Físicas Activas
+          </span>
+          <p className="font-jost text-xl font-bold text-[#1c1917] tabular-nums mt-0.5">
+            {totalRules} <span className="text-xs font-normal text-[#78716c]">matrices validadas</span>
+          </p>
+        </Link>
+
+        <Link href="/admin/configurations" className="hover:opacity-80 transition-opacity">
+          <span className="font-cabin text-[9px] uppercase tracking-wider text-[#78716c] font-semibold block">
+            Diseños de Clientes
+          </span>
+          <p className="font-jost text-xl font-bold text-[#1c1917] tabular-nums mt-0.5">
+            {totalConfigs} <span className="text-xs font-normal text-[#78716c]">guardados</span>
+          </p>
+        </Link>
+      </div>
+
+      {/* Recent Orders Section */}
+      <div className="admin-card overflow-hidden mb-10">
+        <div className="p-4 sm:p-5 border-b border-[#e5e4e2] flex items-center justify-between bg-[#fafaf9]">
+          <div>
+            <h2 className="font-jost font-bold text-[15px] text-[#1c1917]">
+              Últimos Pedidos & Encargos de Clientes
+            </h2>
+            <p className="text-[12px] text-[#78716c]">
+              Configuraciones guardadas o solicitadas directamente desde la plataforma.
+            </p>
+          </div>
           <Link
-            key={stat.label}
-            href={stat.href}
-            className="blok-card p-5 hover:border-[#0a0d0f] transition-all group"
+            href="/admin/orders"
+            className="text-[11px] font-cabin uppercase font-bold tracking-wider text-[#1c1917] hover:underline"
           >
-            <span className="font-cabin text-[9px] uppercase tracking-wider text-[#2e3438] block mb-1">{stat.tag}</span>
-            <p className="font-jost text-3xl font-bold text-[#0a0d0f] tracking-tight group-hover:text-[#1dd8e1] transition-colors">
-              {stat.value}
-            </p>
-            <p className="font-cabin text-[11px] uppercase tracking-wider text-[#2e3438] mt-1 font-semibold">
-              {stat.label}
-            </p>
+            Ver todos los pedidos →
           </Link>
-        ))}
+        </div>
+
+        {recentOrders.length === 0 ? (
+          <div className="admin-empty">
+            <p className="admin-empty-title">Sin pedidos registrados todavía</p>
+            <p className="text-[12px] max-w-sm">
+              Cuando los clientes configuren un reloj o guarden su diseño en el configurador, aparecerán registrados aquí.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Código / Fecha</th>
+                  <th>Cliente</th>
+                  <th>Reloj / Componentes</th>
+                  <th>Importe</th>
+                  <th>Estado</th>
+                  <th className="text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e5e4e2]">
+                {recentOrders.map((order) => {
+                  const code = order.shareCode || order.shareToken.slice(0, 8).toUpperCase()
+                  return (
+                    <tr key={order.id}>
+                      <td>
+                        <span className="font-mono text-[12px] font-semibold text-[#1c1917] block">
+                          {code}
+                        </span>
+                        <span className="font-cabin text-[10px] text-[#78716c]">
+                          {formatDate(order.createdAt, 'relative')}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="font-medium text-[#1c1917] block">
+                          {order.clientName || 'Cliente Particular'}
+                        </span>
+                        {order.clientPhone && (
+                          <span className="font-mono text-[11px] text-[#78716c]">
+                            {order.clientPhone}
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <span className="font-medium text-[#1c1917] block">
+                          {order.name || 'Bespoke Custom Build'}
+                        </span>
+                        <span className="font-cabin text-[10px] text-[#78716c]">
+                          {order.items.length} componentes ensamblados
+                          {order.engravingText && ' · Con grabado láser'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="font-mono font-semibold text-[#1c1917] tabular-nums">
+                          ${order.totalPrice.toFixed(0)} <span className="font-cabin text-[10px] text-[#78716c]">USD</span>
+                        </span>
+                      </td>
+                      <td>
+                        <StatusBadge status={order.status} />
+                      </td>
+                      <td className="text-right">
+                        <div className="inline-flex items-center gap-2">
+                          <Link
+                            href={`/admin/orders/${order.id}`}
+                            className="admin-btn admin-btn-secondary text-[10px] py-1 px-2.5"
+                          >
+                            Detalle
+                          </Link>
+                          <Link
+                            href={`/configurator/${order.shareCode || order.shareToken}`}
+                            target="_blank"
+                            className="admin-btn admin-btn-secondary text-[10px] py-1 px-2"
+                            title="Ver en visualizador 1:1"
+                          >
+                            ↗
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Quick Actions split into Shop and Customizer */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        {/* Shop actions */}
-        <div className="border border-[#d5d6d7] p-5 rounded-[3px] bg-[#ffffff] space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-cabin text-[11px] uppercase tracking-[0.14em] font-semibold text-[#0a0d0f]">
-              Tienda de Relojes Seiko
+      {/* Quick Operations Matrix */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="admin-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-jost font-bold text-sm text-[#1c1917] uppercase tracking-wide">
+              Piezas & Taller
             </h3>
-            <span className="font-cabin text-[9px] uppercase tracking-wider text-[#1dd8e1] bg-[#0a0d0f] px-1.5 py-0.5 rounded-[2px] font-bold">
-              Catálogo
-            </span>
+            <span className="w-2 h-2 rounded-full bg-[#1dd8e1]" />
           </div>
-          <p className="text-[12px] text-[#2e3438]">
-            Gestiona los modelos terminados que los clientes pueden comprar directamente.
+          <p className="text-[12px] text-[#78716c] leading-relaxed mb-4">
+            Añade nuevos diales, cajas o agujas con calibración milimétrica de escala y posición visual.
           </p>
-          <div className="flex gap-2 pt-1">
-            <Link href="/admin/watches/new" className="btn-teal text-[10px] py-2 px-3">
-              + Nuevo Reloj
+          <div className="flex flex-col gap-2">
+            <Link href="/admin/pieces/new" className="admin-btn admin-btn-primary justify-start">
+              + Añadir Componente
             </Link>
-            <Link href="/admin/watches" className="btn-outline-dark text-[10px] py-2 px-3">
-              Ver Catálogo Tienda
+            <Link href="/admin/pieces" className="admin-btn admin-btn-secondary justify-start">
+              Gestionar Inventario
             </Link>
           </div>
         </div>
 
-        {/* Customizer actions */}
-        <div className="border border-[#d5d6d7] p-5 rounded-[3px] bg-[#ffffff] space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-cabin text-[11px] uppercase tracking-[0.14em] font-semibold text-[#0a0d0f]">
-              Taller de Personalización
+        <div className="admin-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-jost font-bold text-sm text-[#1c1917] uppercase tracking-wide">
+              Compatibilidad Física
             </h3>
-            <span className="font-cabin text-[9px] uppercase tracking-wider text-[#0a0d0f] bg-[#f7f7f7] border border-[#d5d6d7] px-1.5 py-0.5 rounded-[2px] font-bold">
-              Configurador
-            </span>
+            <span className="w-2 h-2 rounded-full bg-[#92680a]" />
           </div>
-          <p className="text-[12px] text-[#2e3438]">
-            Administra piezas, fotos transparentes de composición y compatibilidad.
+          <p className="text-[12px] text-[#78716c] leading-relaxed mb-4">
+            Garantiza que coronas, biseles y esferas solo puedan combinarse con cajas mecánicamente compatibles.
           </p>
-          <div className="flex gap-2 pt-1">
-            <Link href="/admin/pieces/new" className="btn-outline-dark text-[10px] py-2 px-3">
-              + Nueva Pieza
+          <div className="flex flex-col gap-2">
+            <Link href="/admin/compatibility" className="admin-btn admin-btn-secondary justify-start">
+              Revisar Reglas Físicas
             </Link>
-            <Link href="/admin/pieces" className="btn-outline-dark text-[10px] py-2 px-3">
-              Ver Componentes
+            <Link href="/admin/categories" className="admin-btn admin-btn-secondary justify-start">
+              Ordenar Pasos del Configurador
             </Link>
-            <Link href="/admin/compatibility" className="btn-outline-dark text-[10px] py-2 px-3">
-              Reglas
+          </div>
+        </div>
+
+        <div className="admin-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-jost font-bold text-sm text-[#1c1917] uppercase tracking-wide">
+              Boutique Seiko
+            </h3>
+            <span className="w-2 h-2 rounded-full bg-[#166534]" />
+          </div>
+          <p className="text-[12px] text-[#78716c] leading-relaxed mb-4">
+            Publica relojes terminados para compra directa en la tienda online con fotos de alta resolución.
+          </p>
+          <div className="flex flex-col gap-2">
+            <Link href="/admin/watches/new" className="admin-btn admin-btn-primary justify-start">
+              + Nuevo Reloj Seiko
+            </Link>
+            <Link href="/admin/watches" className="admin-btn admin-btn-secondary justify-start">
+              Ver Catálogo Completo
             </Link>
           </div>
         </div>
       </div>
-
-      {/* Recent Configurations */}
-      {recentConfigs.length > 0 && (
-        <div>
-          <p className="font-cabin text-[11px] uppercase tracking-[0.12em] font-semibold text-[#0a0d0f] mb-3">
-            Últimos Diseños Creados por Clientes en el Configurador
-          </p>
-          <div className="border border-[#d5d6d7] rounded-[3px] bg-[#ffffff] divide-y divide-[#d5d6d7] overflow-hidden">
-            {recentConfigs.map(config => (
-              <div key={config.id} className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-poppins font-medium text-[13px] text-[#0a0d0f]">
-                    {config.name || 'Diseño Bespoke'}
-                  </p>
-                  <p className="font-cabin text-[11px] text-[#2e3438] mt-0.5">
-                    {config.items.length} componentes montados · {new Date(config.createdAt).toLocaleDateString()}
-                    {config.shareCode && <span className="font-mono text-[#1dd8e1] font-bold ml-2">[{config.shareCode}]</span>}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-mono text-[14px] font-semibold text-[#0a0d0f] tabular-nums">
-                    ${config.totalPrice.toFixed(0)} USD
-                  </p>
-                  <Link
-                    href={`/configurator/${config.shareCode || config.shareToken}`}
-                    target="_blank"
-                    className="font-cabin text-[10px] uppercase tracking-wider text-[#2e3438] hover:text-[#0a0d0f] underline"
-                  >
-                    Ver en 1:1 →
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

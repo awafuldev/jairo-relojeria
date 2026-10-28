@@ -122,11 +122,17 @@ model Configuration {
   engravingText  String?  // custom caseback or rotor engraving text
   engravingFont  String?  // e.g. "classic", "modern", "script"
   totalPrice     Float    @default(0)
-  status         String   @default("draft") // "draft" | "saved" | "ordered"
+  status         String   @default("draft") // "draft" | "saved" | "pending" | "confirmed" | "in_progress" | "completed" | "cancelled" | "ordered"
+  clientName     String?
+  clientEmail    String?
+  clientPhone    String?
+  clientNotes    String?  // client's order notes
+  adminNotes     String?  // internal admin notes
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  items ConfigurationItem[]
+  items      ConfigurationItem[]
+  statusLogs ConfigurationStatusLog[]
 }
 
 model ConfigurationItem {
@@ -139,6 +145,17 @@ model ConfigurationItem {
   configuration Configuration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
   piece         Piece          @relation(fields: [pieceId], references: [id])
   category      Category       @relation(fields: [categoryId], references: [id])
+}
+
+model ConfigurationStatusLog {
+  id              String   @id @default(cuid())
+  configurationId String
+  fromStatus      String?
+  toStatus        String
+  note            String?
+  createdAt       DateTime @default(now())
+
+  configuration Configuration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
 }
 
 model AdminUser {
