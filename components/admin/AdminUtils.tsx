@@ -1,7 +1,6 @@
-'use client'
-
 /**
  * Shared admin UI utilities for Jairo Relojería
+ * Isomorphic: safe to import in Server Components and Client Components
  */
 
 // Status configuration map
